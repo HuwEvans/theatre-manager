@@ -1,0 +1,40 @@
+# Changelog
+
+## Version 1.5
+Complete the shortcodes for Season, Shows, and Cast
+Code Cleanup
+Update the documentation and Change log files
+Fix additional formatting errors
+Fix syntax errors
+
+## Version 1.4
+Complete shortcodes for Sponsors and Contributors
+Fix formatting and syntax errors
+
+## Version 1.3
+Complete shortcodes for Advertisers banner
+
+## Version 1.2
+Complete shortcodes for advertisers, testimonials and board members
+Fix syntax and formatting
+
+## Version 1.1
+Fix display issues with admin menu
+
+## Version 1.0
+Initial version of the plugin
+Created CPTs for all Theatre Manager post types
+ - Board Members
+ - Advertisers
+ - Sponsors
+ - Contributors
+ - Seasons
+ - Shows
+ - Casts
+ - Testimonials
+ 
+# ToDo
+Add Season subscription link to season CPT
+Add show ticket links to shows
+Add bios for actors
+Create a sync process for Sharepoint as a separate plugin
