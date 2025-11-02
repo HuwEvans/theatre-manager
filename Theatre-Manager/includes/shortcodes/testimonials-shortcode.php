@@ -11,46 +11,43 @@ function tm_testimonials_shortcode($atts) {
     // Get display options
     $bg_color = get_option('tm_testimonials_bg_color', '#ffffff');
     $text_color = get_option('tm_testimonials_text_color', '#000000');
-	$border_color = get_option('tm_testimonials_border_color', '#000000');
+    $border_color = get_option('tm_testimonials_border_color', '#000000');
     $border_width = get_option('tm_testimonials_border_width', '1');
     $rounded = get_option('tm_testimonials_rounded') ? '10px' : '0';
     $radius = get_option('tm_testimonials_radius', '10');
     $shadow = get_option('tm_testimonials_shadow') ? '0 4px 8px rgba(0,0,0,0.1)' : 'none';
     $rating_symbol = get_option('tm_testimonials_rating_symbol', 'Stars');
 
+    // Symbol sets. For some sets we will use the same glyph for filled and empty
+    // and rely on CSS filters/opacity to show the difference.
     $symbols = array(
         'Stars' => array('filled' => '★', 'empty' => '☆'),
-        'Thumbs Up' => array('filled' => '👍', 'empty' => '🫳'),
-        'Rockets' => array('filled' => '🚀', 'empty' => '⬜'),
+        'Thumbs Up' => array('filled' => '👍', 'empty' => '👍'),
+        'Rockets' => array('filled' => '🚀', 'empty' => '🚀'),
         'Hearts' => array('filled' => '❤️', 'empty' => '🤍'),
-        'Theatre Masks' => array('filled' => '🎭', 'empty' => '🎭') // Use CSS to style empty
+        'Theatre Masks' => array('filled' => '🎭', 'empty' => '🎭')
     );
-    $symbol_set = isset($symbols[$rating_symbol]) ? $symbols[$rating_symbol] : $symbols['Stars'];
 
-    echo '<style>
-        .tm-symbol-filled {
-            color: ' . esc_attr($text_color) . ';
-            opacity: 1;
-        }
-        .tm-symbol-empty {
-            color: ' . esc_attr($text_color) . ';
-            text-shadow:
-                -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000;
-            opacity: 1;
-        }
-        .tm-testimonials-slider {
-            width: 100%;
-            margin: 0 auto;
-			height: auto;
-        }
-    </style>';
+    $symbol_set = isset($symbols[$rating_symbol]) ? $symbols[$rating_symbol] : $symbols['Stars'];
+    $use_filter_for_empty = in_array($rating_symbol, array('Theatre Masks', 'Thumbs Up', 'Rockets'));
+
+    // Base CSS for rating symbols
+    $css = '';
+    $css .= '.tm-symbol-filled { color: ' . esc_attr($text_color) . '; opacity: 1; }';
+    $css .= '.tm-symbol-empty { color: ' . esc_attr($text_color) . '; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; opacity: 1; }';
+    $css .= '.tm-testimonials-slider { width: 100%; margin: 0 auto; height: auto; }';
+
+    if ($use_filter_for_empty) {
+        $css .= '.tm-symbol-filled { transform: scale(1.05); }';
+        $css .= '.tm-symbol-empty { opacity: 0.35; filter: grayscale(100%) contrast(80%) brightness(90%); }';
+        $css .= '.tm-symbol-filled, .tm-symbol-empty { font-size: 1.2em; display: inline-block; margin: 0 2px; }';
+    }
+
+    echo '<style>' . $css . '</style>';
 
     // Enqueue Slick Slider assets
     wp_enqueue_style('slick-css', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css');
-	wp_enqueue_style('slick-css', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css');
+    wp_enqueue_style('slick-css', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css');
     wp_enqueue_script('slick-js', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js', array('jquery'), null, true);
     wp_add_inline_script('slick-js', '
         jQuery(document).ready(function($) {
@@ -62,7 +59,7 @@ function tm_testimonials_shortcode($atts) {
                 adaptiveHeight: true,
                 autoplay: true,
                 autoplaySpeed: 5000,
-				arrows: true
+                arrows: true
             });
         });
     ');

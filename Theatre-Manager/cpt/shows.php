@@ -64,8 +64,12 @@ function tm_render_show_meta_box($post) {
     ];
 
     foreach ($fields as $key => $default) {
-        $fields[$key] = get_post_meta($post->ID, '_tm_show_' . $key, true);
+            $fields[$key] = get_post_meta($post->ID, '_tm_show_' . $key, true);
     }
+
+        // Program meta (separate fields: attachment ID and URL)
+        $program_id = get_post_meta($post->ID, '_tm_show_program', true);
+        $program_url = get_post_meta($post->ID, '_tm_show_program_url', true);
 
     $genres = ['Comedy', 'Farce', 'Mystery', 'Drama', 'Musical'];
     $slots = ['Fall', 'Winter', 'Spring'];
@@ -101,9 +105,54 @@ function tm_render_show_meta_box($post) {
 
 	echo '<p><label>SM Image:<br>';
 	echo '<input type="text" name="tm_show_sm_image" id="tm_show_sm_image" value="' . esc_attr($fields['sm_image']) . '" class="widefat" />';
-	echo '<button type="button" class="button tm-media-button" data-target="tm_show_sm_image" data-preview="tm_show_sm_image_preview">Select Image</button>';
+    echo '<button type="button" class="button tm-media-button" data-target="tm_show_sm_image" data-preview="tm_show_sm_image_preview">Select Image</button>';
 	echo '</label></p>';
 	echo '<div><img id="tm_show_sm_image_preview" src="' . esc_url($fields['sm_image']) . '" style="max-width:150px;' . ($fields['sm_image'] ? '' : ' display:none;') . '" /></div>';
+
+    // Program PDF upload field (visible URL + hidden attachment ID)
+    echo '<p><label>Program PDF:<br>';
+    echo '<input type="text" name="tm_show_program" id="tm_show_program" value="' . esc_attr($program_url) . '" class="widefat" />';
+    echo '<input type="hidden" name="tm_show_program_id" id="tm_show_program_id" value="' . esc_attr($program_id) . '" />';
+    echo '<button type="button" class="button tm-media-button" data-target="tm_show_program" data-preview="tm_show_program_preview">Select PDF</button>';
+    echo '</label></p>';
+    // Determine a sensible preview src for admin UI: prefer generated preview or attachment image size, then icon, then don't show
+    $program_preview_src = '';
+    if ($program_id) {
+        // try WP image sizes for attachment
+        $att_preview = wp_get_attachment_image_src($program_id, 'medium');
+        if ($att_preview) {
+            $program_preview_src = $att_preview[0];
+        } else {
+            // try our generated preview meta
+            $gen = get_post_meta($program_id, '_tm_pdf_preview', true);
+            if ($gen) $program_preview_src = $gen;
+            else {
+                // try WP thumbnail/icon
+                $thumb = wp_get_attachment_thumb_url($program_id);
+                if ($thumb) $program_preview_src = $thumb;
+            }
+        }
+    } else {
+        // no attachment id; if URL points to an attachment, try to resolve id
+        if (!empty($program_url)) {
+            $maybe_id = attachment_url_to_postid($program_url);
+            if ($maybe_id) {
+                $att_preview = wp_get_attachment_image_src($maybe_id, 'medium');
+                if ($att_preview) $program_preview_src = $att_preview[0];
+                else {
+                    $gen = get_post_meta($maybe_id, '_tm_pdf_preview', true);
+                    if ($gen) $program_preview_src = $gen;
+                    else {
+                        $thumb = wp_get_attachment_thumb_url($maybe_id);
+                        if ($thumb) $program_preview_src = $thumb;
+                    }
+                }
+            }
+        }
+    }
+
+    $program_preview_style = $program_preview_src ? '' : ' display:none;';
+    echo '<div><img id="tm_show_program_preview" src="' . esc_url($program_preview_src) . '" style="max-width:150px;' . $program_preview_style . '" /></div>';
 }
 /**
  * Save Show Meta
@@ -122,6 +171,26 @@ function tm_save_show_meta($post_id) {
     foreach ($fields as $field) {
         if (isset($_POST['tm_show_' . $field])) {
             update_post_meta($post_id, '_tm_show_' . $field, sanitize_text_field($_POST['tm_show_' . $field]));
+        }
+    }
+
+    // Program saving: prefer explicit attachment ID if provided, otherwise resolve URL
+    if (isset($_POST['tm_show_program_id']) && is_numeric($_POST['tm_show_program_id'])) {
+        $att_id = intval($_POST['tm_show_program_id']);
+        update_post_meta($post_id, '_tm_show_program', $att_id);
+        update_post_meta($post_id, '_tm_show_program_url', esc_url_raw(wp_get_attachment_url($att_id)));
+    } elseif (isset($_POST['tm_show_program'])) {
+        $val = sanitize_text_field($_POST['tm_show_program']);
+        $att_id = 0;
+        if (!empty($val)) {
+            $att_id = attachment_url_to_postid($val);
+        }
+        if ($att_id) {
+            update_post_meta($post_id, '_tm_show_program', $att_id);
+            update_post_meta($post_id, '_tm_show_program_url', esc_url_raw(wp_get_attachment_url($att_id)));
+        } else {
+            update_post_meta($post_id, '_tm_show_program', '');
+            update_post_meta($post_id, '_tm_show_program_url', esc_url_raw($val));
         }
     }
 

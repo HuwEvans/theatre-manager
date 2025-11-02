@@ -33,8 +33,83 @@ function tm_register_plugin_menu() {
 		'tm_instructions',
 		'tm_instructions_page'
 	);
+
+	add_submenu_page(
+		'theatre-manager',
+		'Regenerate PDF Previews',
+		'Regenerate PDF Previews',
+		'manage_options',
+		'tm_regenerate_previews',
+		'tm_regenerate_previews_page'
+	);
 }
 add_action('admin_menu', 'tm_register_plugin_menu');
+
+
+/**
+ * Admin page: Regenerate PDF previews for attachments
+ */
+function tm_regenerate_previews_page() {
+	if (!current_user_can('manage_options')) {
+		wp_die('Insufficient permissions');
+	}
+
+	echo '<div class="wrap">';
+	echo '<h1>Regenerate PDF Previews</h1>';
+
+	if (isset($_POST['tm_regenerate_previews_nonce'])) {
+		if (!wp_verify_nonce($_POST['tm_regenerate_previews_nonce'], 'tm_regenerate_previews_action')) {
+			echo '<div class="notice notice-error"><p>Nonce verification failed.</p></div>';
+		} else {
+			// Run regeneration
+			$args = array(
+				'post_type' => 'attachment',
+				'post_mime_type' => 'application/pdf',
+				'numberposts' => -1
+			);
+			$pdfs = get_posts($args);
+			$count = 0;
+			$failed = 0;
+			$messages = array();
+			foreach ($pdfs as $p) {
+				// Clear existing meta so generator re-writes
+				delete_post_meta($p->ID, '_tm_pdf_preview');
+				// Call the generator directly and collect diagnostics
+				if (function_exists('tm_generate_pdf_preview')) {
+					$res = tm_generate_pdf_preview($p->ID);
+					if (is_array($res) && !empty($res['success'])) {
+						$count++;
+						$messages[] = sprintf('%s: OK (%s)', esc_html($p->post_title), esc_html($res['message']));
+					} else {
+						$failed++;
+						$msg = is_array($res) && !empty($res['message']) ? $res['message'] : 'Unknown error';
+						$messages[] = sprintf('%s: FAILED (%s)', esc_html($p->post_title), esc_html($msg));
+					}
+				} else {
+					$failed++;
+					$messages[] = sprintf('%s: FAILED (generator not available)', esc_html($p->post_title));
+				}
+			}
+
+			echo '<div class="notice notice-success"><p>Processed ' . intval(count($pdfs)) . ' PDFs. Previews generated: ' . intval($count) . '. Failed: ' . intval($failed) . '.</p></div>';
+			if (!empty($messages)) {
+				echo '<div class="notice"><ul style="max-height:300px;overflow:auto;">';
+				foreach ($messages as $m) {
+					echo '<li>' . esc_html($m) . '</li>';
+				}
+				echo '</ul></div>';
+			}
+		}
+	}
+
+	echo '<form method="post">';
+	wp_nonce_field('tm_regenerate_previews_action', 'tm_regenerate_previews_nonce');
+	echo '<p>This will attempt to generate a first-page JPEG preview for every PDF in the media library. Your server must have Imagick and PDF support installed for previews to be created.</p>';
+	submit_button('Regenerate PDF Previews', 'primary', 'tm_regenerate_previews_submit');
+	echo '</form>';
+
+	echo '</div>';
+}
 
 /**
  * Display Options Page with Tabs
@@ -146,8 +221,8 @@ function tm_grid_columns_callback($args) {
 
 function tm_instructions_page() {
 	echo "<h1>Theatre Manager Instructions</h1>";
-	echo "# Theatre Manager Wordpress Plugin<br/>
-This plugin is designed to work with Wordpress and wsa developed to help theatre groups manage important objects<br/>
+	echo "<h2>Theatre Manager Wordpress Plugin</h2>
+This plugin is designed to work with Wordpress and was developed to help theatre groups manage important objects<br/>
 on their websites.  It was designed after serveral years of maintaining a website for this purpose, and combines<br/>
 simpliying the management of common changes that are required, and making it simple for non-technical people to <br/>
 update the information.  Once it is up and running, it should be very sraight forward to make changes and have <br/>
@@ -157,218 +232,61 @@ The plugin has 2 main aspects.  The Custom Post Types (CPTs) and the shortcodes 
 combination of tools should allow someone to easily inplement these on a wordpress website, and provide a modcum<br/>
 of control over how the elements are displayed.<br/>
 <br/>
-## The Custom Post Types<br/>
-### Advertisers<br/>
+<h2>The Custom Post Types</h2>
+<h3>Advertisers</h3>
 	This CPT allows for entering advertisers that have paid the group to help prmot there business.  It will keep <br/>
 	track of the name, logo, banner and website of each advertiser.  There is also a flag to designate an advertiser<br/>
 	as a restaurant.  This was done to allow for the ability to create a 'Diner's Guide'.  Helping to promote<br/>
 	local restaurants that patrons might what to frequent before or after a show.  It allows the advertisers to <br/>
 	supply a link to a promotion that they can offer to people who get to them via advertising with the group.<br/>
-### Board Members<br/>
+<h3>Board Members</h3>
 	This CPT tracks information about the board members or creative team for the group.  It has the names and <br/>
 	positions of each board member, and allows for a picture to be added for each board member.<br/>
-### Contributors<br/>
+<h3>Contributors</h3>
 	This CPT track infomation about donors to the group and provides a means of acknowlegding them on the website. <br/>
 	It provides an easy way to manage the donors and see them in one place.<br/>
-### Sponsors<br/>
+<h3>Sponsors</h3>
 	This CPT provides a means of tracking sponsors to the group.  This will allow for generating a of people and <br/>
 	organizations that have taken part in the sponsorship program with the group.<br/>
-### Testimonials<br/>
+<h3>Testimonials</h3>
 	This CPT allows for tracking of testimonials that have been provided by indivuals who have seen the shows and<br/>
 	have gone out of there way to provide feedback.<br/>
-### Seasons -> Shows -> Casts<br/>
+<h3>Seasons -> Shows -> Casts</h3>
 	These CPTs are probable the most ussful of all the CPTs.  It provides a means to easily track the information <br/>
 	about a season, including the shows and cast members for each show.  When maintaining this information for the<br/>
 	group that I was a part of, it was the area that required the most updating, and had several components that <br/>
 	were difficult to maintain.  Providing these CPTs, I wanted to provide an easy way to link all of this data <br/>
-	together for easy display, and provide a simple way see and modify the data.<br/>
+	together for easy display, and	 provide a simple way see and modify the data.<br/>
 <br/>
-## Display Options<br/>
+<h3>Display Options</h3>
 This section of the plugin admin area will help with customizing the way that the shortcodes display the CPTs. <br/>
 Primarily, you will be able to control the background color, the text color, the border color and width, whether<br/>
 or not there are rounded corners, and then some other specifics to the individual CPT.  Please note that not all<br/>
 settings apply to all shortcode display types.  For instance the slider types typically do not use any cusomizations<br/>
 from the display options.<br/>
 <br/>
-## The Shortcodes<br/>
-### Advertisers<br/>
-#### [tm_advertisers]<br/>
-This short code will help you display the advertisers CPTs in multiple ways.  As part of our advertising process<br/>
-we included for the price of advertising inclusion in our diners guide for restaurants.  This is the one filter <br/>
-that I have added to the advertiser shortcode to simply the creation of the diners guide. Images will be linked <br/>
-with the website provided in the CPT.<br/>
-<br/>
-Options:<br/>
-	view:  slider or grid (default is grid)<br/>
-	category: restaurant (default is all)<br/>
-	image_type: banner or logo (default is banner) - Only used for slider view<br/>
-	columns:  1-6 (default is 3) - Only used for grid view<br/>
-	<br/>
-Example:<br/>
-	[tm_advertisers view=\"slider\" category=\"restaurant\"]<br/>
-	This will show only the restaurants in a slider using the banner image<br/>
-	[tm_advertisers]<br/>
-	This will use the defaults, and show a grid of all advertisers in a 3 column format.<br/>
-<br/>
-### Board Members<br/>
-#### [tm_board_members]<br/>
-This short code will display the CPT for board members on any page or post that it is placed on.  It will show the<br/>
-members in a grid with the defined number of columns.  The display options will help with determining how the members<br/>
-are displayed.<br/>
-<br/>
-Options:<br/>
-	show_photos: true/false (default true)<br/>
-	columns: 1-6 (default 3, configurable in the display options)<br/>
-Example:<br/>
-	[tm_board_members]<br/>
-	Shows the board memebers in a 3 column grid with photos<br/>
-	[tm_board_members show_photos=\"false\" columns=\"4\"]<br/>
-	Shows the board members in a 4 column grid without photos.<br/>
-	<br/>
-### Contributors<br/>
-#### [tm_contributors]<br/>
-This shortcode will display the contributors CPT data in a tiered display.  There are no options available for this<br/>
-shortcode, however some control over the display options is available in the admin panel as mentioned above.<br/>
-<br/>
-Options:  None<br/>
-	No options are available, but some control over how the items are displayed is available in the Display Options.<br/>
-Example:<br/>
-	[tm_contributors]<br/>
-	Show the contributors in a tiered list.  Platinum one column, gold 2 column, silver 3 column, bronze 4 column.<br/>
-	<br/>
-### Sponsors<br/>
-#### [tm_sponsors]<br/>
-This is one of two shortcodes for this CPT.  This will show the sponsors in a tiered grid similar to the contributors.<br/>
-The options will allow you to control which peices of information are included in the display cards, and additional<br/>
-control of the display options is available in the admin menu.<br/>
-<br/>
-Options:<br/>
-        show_name: true/false (default true) toggle the display of individual names<br/>
-        show_company: true/false (default true) toggle the display of company names<br/>
-        show_logo: true/false (default true) if set to false will show banner images<br/>
-        show_website: true/false (default true) show text of the website - image links will no be affected<br/>
-				<br/>
-Example:<br/>
-	[tm_sponsors]<br/>
-	This will use the defaults and show all fields as part of the display.  This will show the tiered grid version of<br/>
-	the logos provided, linked to the website provided, and show the individuals name, the company and the website.  The<br/>
-	tiered display will be Platinum one column, gold 2 column, silver 3 column, bronze 4 column.<br/>
-	[tm_sponsors show_name=\"true\" show_company=\"false\" show_logo=\"true\" show_website=\"false\"]<br/>
-	This will show the tiered display, but will only show the individuals name, and the logo (linked to the website).<br/>
-<br/>
-#### [tm_sponsor_slider]<br/>
-This shortcode is designed to provide a slider of the banners supplied for all sponsors.  This was meant to provide a tool<br/>
-to put a vertical banner<br/>
-<br/>
-Options:	None<br/>
-	No Options are available and no display options will affect this shortcode.  This shortcode is designed to display<br/>
-	banners in a slider.<br/>
-	<br/>
-Example:<br/>
-	[tm_sponsor_slider]<br/>
-	Will show the banner images in a slider.<br/>
-	<br/>
-### Testimonials<br/>
-#### [tm_testimonials]<br/>
-This shortcode will display a slider of testimonials.  The only options for this shortcode will be in the display options <br/>
-in the admin panel.<br/>
-<br/>
-Options:	None<br/>
-	No options are avialable to configure the shortcode itself, howver there are many display options in the admin panel <br/>
-	that will allow for customizations of the testimonial slider.<br/>
-<br/>
-Example:<br/>
-	[tm_testimonials]<br/>
-	This will show the testimonial slider with the display options customizations<br/>
-	<br/>
-### Seasons -> Shows -> Casts<br/>
-#### [tm_show_cast]<br/>
-This shortcode will display the cast associated with a specific show.  It will show all fields and will not be contain a<br/>
-lot of formatting.  It will include the pictures and all fields, but no show information.<br/>
-<br/>
-Options:<br/>
-	show_id: <number> (required) id of show to display.<br/>
-	<br/>
-Example:<br/>
-	[tm_show_cast show_id=\"177\"]<br/>
-	This displays information pertining to show with post ID 177.<br/>
-	<br/>
-#### [tm_season_banner]<br/>
-This shortcode will show the Social Media banner for the season specified.<br/>
-<br/>
-Options:<br/>
-	season_id: <number>  (required)  ID of season to show information about.<br/>
-<br/>
-Example:<br/>
-	[tm_season_banner season_id=\"177\"]<br/>
-<br/>
-#### [tm_season_cast]<br/>
-This shortcode will show all of the shows for a season, along with the show details, and include the cast associated with<br/>
-with the show.  There are options on how the data will be displayed that can be used to modify the shortcode behaviour.  The<br/>
-Shows will be displayed sorted by time slot.  (Fall, Winter, Spring)<br/>
-<br/>
-Options:<br/>
-        season_id: <number> (required)  Use the ID number of the season you want to display<br/>
-        show_cast_images:  true/false  (default true) Use to toggle cast pictures<br/>
-        cast_layout: grid/list (default grid) Use to determine the layout of the cast<br/>
-<br/>
-Example:<br/>
-	[tm_season_cast seasonid=\"177\" show_cast_images=false cast_layout=\"grid\"]<br/>
-	This example will display the shows for season with the ID of 177.  It will show the details of any field with data in<br/>
-	it and will show the cast in a grid with no pictures.<br/>
-<br/>
-#### [tm_season_images]<br/>
-This shortcode will display all three images for the given season.  It will put the Social Media banner on the top, and the<br/>
-3-up (or flyer images) underneath next to each other.<br/>
-<br/>
-Options:<br/>
-	season_id: <number> (required)  Use this to determine which season details will be shown<br/>
-	<br/>
-Example:<br/>
-	[tm_season_images seasonid=\"177\"]<br/>
-	This example will show the season images for season with the ID 177.<br/>
-	<br/>
-#### [tm_season_shows]<br/>
-<br/>
-Options:	<br/>
-	season_id:  <number>   Use this to display a single season.  Default is to show all seasons.<br/>
-<br/>
-Example:<br/>
-	[tm_season_shows]<br/>
-	This example will display each season and the associated show summaries in a 3 column grid.<br/>
-	[tm_season_shows season_id=\"177\"]<br/>
-	This example will display the shows for the seaosn with ID 177 in a trhee olumn grid.<br/>
-<br/>
-#### [tm_cast]<br/>
-This shortcode will display all cast posts.  Very little formatting is done, and there are currenly no filtering options for<br/>
-this shortcode <br/>
-<br/>
-Options:<br/>
-	exclude: 'actor_name', 'picture', 'show'<br/>
-<br/>
-Example:<br/>
-	[tm_cast exclude=\"actor_name\"]<br/>
-	By default, all fields are shown. Use 'exclude' to hide specific fields.  This sample will hide the actor_name field<br/>
-<br/>
-#### [tm_seasons]<br/>
-This shortcode shows all season data unformatted.  The exclude options allows you to hide fields.<br/>
-<br/>
-Options:<br/>
-	exclude: 'image_front', 'image_back', 'social_banner', 'start_date', 'end_date'<br/>
-<br/>
-Example:<br/>
-	Usage: [tm_seasons exclude=\"start_date,end_date\"]<br/>
-	By default, all fields are shown. Use 'exclude' to hide specific fields.  This sample will hide the start and end dates<br/>
-<br/>
-#### [tm_shows]<br/>
-This shortcode will show the details of all shows.  Fields can be excluded by using the exclude option<br/>
-<br/>
-Options:<br/>
-	exclude: 'author', 'sub_authors', 'synopsis', 'genre', 'director', 'associate_director', 'time_slot', 'show_dates'<br/>
-<br/>
-Example:<br/>
-	[tm_shows exclude=\"genre,director\"]<br/>
-	By default, all fields are shown. Use 'exclude' to hide specific fields.  This sample will hide the director and genre fields<br/>
-";
+<h3>The Shortcodes</h3>
+<p><h4>Theatre Manager Plugin Shortcode Reference</h4></p>
+<p>This document lists the shortcodes provided by the Theatre Manager plugin, their parameters, admin options (where applicable), and example usage. Each shortcode outputs markup with CSS classes you can override in your theme.</p>
+<p>Guidelines<br />- Dates: seasons use post meta keys &apos;_tm_season_start_date&apos; and &apos;_tm_season_end_date&apos; (strings parsed with PHP&apos;s &apos;strtotime&apos;). The plugin sorts seasons by parsed start date.<br />- Season selector: Several shortcodes accept a &apos;which&apos; attribute with values: &apos;all&apos; (default), &apos;current&apos;, &apos;next&apos;, &apos;current_and_next&apos;. &apos;current&apos; is strictly where today &gt; start AND today &lt; end.</p>
+<p><h4>Available Shortcodes</h4></p>
+<p>1)<b> [tm_advertisers]</b><br />Purpose: Displays a grid/list of advertisers (CPT &apos;advertiser&apos;).<br />Parameters:<br />- title (optional): Section title to display above the list<br />- category (optional): Filter by advertiser category slug or name<br />- layout (optional): &apos;grid&apos; (default) or &apos;list&apos;<br />- count (optional): number of advertisers to return (default: all)<br />Example:<br />[tm_advertisers title=&quot;Our Supporters&quot; category=&quot;platinum&quot; layout=&quot;grid&quot; count=&quot;6&quot;]</p>
+<p>2)<b> [tm_board_members]</b><br />Purpose: Shows board members CPT in a grid/list.<br />Parameters:<br />- title (optional)<br />- layout (optional): &apos;grid&apos; or &apos;list&apos;<br />Example:<br />[tm_board_members title=&quot;Board&quot; layout=&quot;grid&quot;]</p>
+<p>3)<b> [tm_cast]</b><br />Purpose: Displays cast members (CPT &apos;cast&apos;). Supports grouping by show.<br />Parameters:<br />- show_id (optional): integer show ID to limit cast to a single show<br />- exclude (optional): comma-separated list of cast fields to hide, e.g. &apos;picture,actor_name,show&apos;<br />- orderby (optional): WP query orderby value (default &apos;title&apos;)<br />- order (optional): &apos;ASC&apos; or &apos;DESC&apos; (default &apos;ASC&apos;)<br />- group_by (optional): &apos;none&apos; (default) or &apos;show&apos; &mdash; when &apos;show&apos; the cast is rendered grouped under show titles<br />Examples:<br />- All cast: [tm_cast]<br />- Cast for show 123: [tm_cast show_id=&quot;123&quot;]<br />- Grouped by show, hide pictures: [tm_cast group_by=&quot;show&quot; exclude=&quot;picture&quot;]</p>
+<p>4)<b> [tm_contributors]</b><br />Purpose: Lists contributors/donors (CPT &apos;contributor&apos;).<br />Parameters:<br />- layout (optional): &apos;grid&apos; or &apos;list&apos;<br />- category (optional)<br />Example:<br />[tm_contributors layout=&quot;grid&quot;]</p>
+<p>5)<b> [tm_programs]</b><br />Purpose: Displays program/playbill information. Uses program attachment post meta on shows.<br />Parameters:<br />- show_id (optional): specific show<br />- season_id (optional)<br />Example:<br />[tm_programs show_id=&quot;123&quot;]</p>
+<p>6)<b> [tm_seasons]</b><br />Purpose: Shows season posts.<br />Parameters:<br />- count (optional): Number of seasons to display (default: all)<br />- layout (optional): &apos;list&apos; or &apos;grid&apos;<br />Example:<br />[tm_seasons count=&quot;4&quot; layout=&quot;grid&quot;]</p>
+<p>7)<b> [tm_shows]</b><br />Purpose: Displays shows listing, grouped by season and time slot.<br />Parameters:<br />- season_id (optional): ID of a specific season. If omitted, the shortcode may display multiple seasons sorted by start date.<br />- which (optional): One of &apos;all&apos; (default), &apos;current&apos;, &apos;next&apos;, &apos;current_and_next&apos;. Only used when &apos;season_id&apos; is omitted.<br />- exclude (optional): comma-separated list of show fields to exclude (e.g., &apos;sm_image,program&apos;)<br />- layout (optional): &apos;grid&apos; (default) or &apos;list&apos;<br />- count (optional): number of shows to display (default: all)<br />Behavior:<br />- Shows are sorted by the season start date (ascending). Within a season shows are grouped/ordered by time slot: &apos;Fall&apos;, &apos;Winter&apos;, &apos;Spring&apos;. Shows without a season appear last under &quot;Other Shows&quot;.<br />Example:<br />[tm_shows which=&quot;current&quot; exclude=&quot;synopsis&quot; layout=&quot;grid&quot;]</p>
+<p>8)<b> [tm_sponsor_slider]</b><br />Purpose: Creates a sliding showcase of sponsors (CPT &apos;sponsor&apos;).<br />Parameters:<br />- category (optional)<br />- speed (optional): milliseconds for autoplay speed (default depends on slider settings)<br />Example:<br />[tm_sponsor_slider category=&quot;platinum&quot; speed=&quot;4000&quot;]</p>
+<p>9)<b> [tm_sponsors]</b><br />Purpose: Displays sponsors list.<br />Parameters:<br />- category (optional)<br />- layout (optional): &apos;grid&apos; or &apos;list&apos;<br />- title (optional)<br />Example:<br />[tm_sponsors category=&quot;gold&quot; layout=&quot;grid&quot; title=&quot;Our Sponsors&quot;]</p>
+<p>10)<b> [tm_testimonials]</b><br />Purpose: Shows testimonials (CPT &apos;testimonial&apos;) with configurable rating symbol.<br />Parameters:<br />- count (optional): Number of testimonials to display<br />- layout (optional): &apos;slider&apos; or &apos;list&apos; (the shortcode uses Slick slider by default)<br />Admin option (Display &rarr; Testimonials):<br />- Option name: &apos;tm_testimonials_rating_symbol&apos;<br />- Default: &apos;Stars&apos;<br />- Available values and behavior:<br />- &apos;Stars&apos; &mdash; filled: ★, empty: ☆ (different glyphs)<br />- &apos;Thumbs Up&apos; &mdash; filled: 👍, empty: same glyph (displayed faded via CSS filters)<br />- &apos;Rockets&apos; &mdash; filled: 🚀, empty: same glyph (displayed faded via CSS filters)<br />- &apos;Hearts&apos; &mdash; filled: ❤️, empty: 🤍 (different glyphs)<br />- &apos;Theatre Masks&apos; &mdash; filled: 🎭, empty: same glyph (displayed faded via CSS filters)<br />Notes:<br />- Each testimonial stores an integer rating in post meta &apos;_tm_rating&apos; (0&ndash;5). The shortcode renders five symbols and uses the selected symbol set.<br />- The &apos;Thumbs Up&apos;, &apos;Rockets&apos; and &apos;Theatre Masks&apos; options use the same glyph for filled and empty and rely on CSS (opacity/grayscale) to make the empty glyph visually distinct.<br />Example:<br />[tm_testimonials count=&quot;5&quot; layout=&quot;slider&quot;]</p>
+<p>11)<b> [tm_show_cast]</b><br />Purpose: Displays cast for a specific show (wrapper around cast entries filtered by show).<br />Parameters:<br />- show_id (required): ID of the show to display cast for<br />Example:<br />[tm_show_cast show_id=&quot;123&quot;]</p>
+<p>12)<b> [tm_season_banner]</b><br />Purpose: Displays the season banner/header (uses season featured image/meta).<br />Parameters:<br />- season_id (required): ID of the season<br />Example:<br />[tm_season_banner season_id=&quot;456&quot;]</p>
+<p>13)<b> [tm_season_cast]</b><br />Purpose: Shows cast members grouped by season and show (when &apos;season_id&apos; omitted the &apos;which&apos; selector applies).<br />Parameters:<br />- season_id (optional): ID of the season (omit to use &apos;which&apos;)<br />- which (optional): &apos;all&apos; (default) | &apos;current&apos; | &apos;next&apos; | &apos;current_and_next&apos;<br />- show_cast_images (optional): &apos;true&apos; (default) or &apos;false&apos; &mdash; whether to show cast pictures<br />- cast_layout (optional): &apos;grid&apos; (default) or &apos;list&apos;<br />Notes:<br />- After each show&apos;s cast the shortcode will render a &quot;Program Preview&quot; when a program attachment or URL exists. The preview prefers a generated thumbnail (&apos;_tm_pdf_preview&apos;), falls back to the attachment image, and finally to a client-side canvas rendering (PDF.js).<br />Example:<br />[tm_season_cast which=&quot;current&quot; cast_layout=&quot;list&quot; show_cast_images=&quot;true&quot;]</p>
+<p>14)<b> [tm_season_images]</b><br />Purpose: Displays an image gallery tied to a season.<br />Parameters:<br />- season_id (required): ID of the season<br />- layout (optional): &apos;grid&apos; or &apos;slider&apos;<br />Example:<br />[tm_season_images season_id=&quot;456&quot; layout=&quot;grid&quot;]</p>
+<p>15)<b> [tm_season_shows]</b><br />Purpose: Lists shows grouped by season (or filtered to specific seasons).<br />Parameters:<br />- season_id (optional): ID of the season to show (omit to list multiple seasons)<br />- which (optional): &apos;all&apos; (default) | &apos;current&apos; | &apos;next&apos; | &apos;current_and_next&apos;<br />- layout (optional): &apos;grid&apos; or &apos;list&apos;<br />Notes:<br />- Seasons are sorted by &apos;_tm_season_start_date&apos; (earliest first). Current/next selection is based on strict comparisons (today &gt; start AND today &lt; end).<br />Example:<br />[tm_season_shows which=&quot;current_and_next&quot; layout=&quot;grid&quot;]</p>
+<p><h3>Common Parameter Types</h3>- layout: accepts values like &apos;grid&apos;, &apos;list&apos;, &apos;slider&apos; depending on shortcode<br />- count: integer number of items to return<br />- category: string matching a category slug or name<br />- *_id: integer ID of the resource (show_id, season_id, etc.)</p>
+<p><h3>Styling and Hooks</h3>- All shortcodes add semantic CSS classes (for example &apos;.tm-show-card&apos;, &apos;.tm-cast-grid&apos;, &apos;.tm-program-preview&apos;) so you can override styles in your theme or enqueue your own stylesheet.<br />- Filters: many shortcodes use WordPress filters in their templates; see the shortcode functions in &apos;includes/shortcodes/&apos; if you need to hook or modify output programmatically.</p>
+<p><h3>Examples (copy/paste)</h3>- All shows for current season: [tm_shows which=&quot;current&quot;]<br />- Cast grouped by show (for a specific season): [tm_season_cast season_id=&quot;456&quot; group_by=&quot;show&quot;]<br />- Testimonials slider (5 items): [tm_testimonials count=&quot;5&quot; layout=&quot;slider&quot;]<br />- Show a program preview after each cast: the &apos;tm_season_cast&apos; shortcode does this by default when a program attachment or URL exists.</p>";
 }
 ?>

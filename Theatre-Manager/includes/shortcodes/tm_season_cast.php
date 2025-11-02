@@ -18,39 +18,117 @@ function tm_season_cast_shortcode($atts) {
     $atts = shortcode_atts([
         'season_id' => 0,
         'show_cast_images' => 'true',
-        'cast_layout' => 'grid'
+        'cast_layout' => 'grid',
+        // which: all | current | next | current_and_next
+        'which' => 'all'
     ], $atts);
-    if (!$atts['season_id']) return '';
+
+    // Determine seasons to render. If season_id provided, use that; otherwise use 'which' selection
+    if (!empty($atts['season_id'])) {
+        $seasons = get_posts([
+            'post_type' => 'season',
+            'numberposts' => -1,
+            'p' => intval($atts['season_id'])
+        ]);
+    } else {
+        // Load all seasons and sort by start date
+        $seasons = get_posts(['post_type' => 'season', 'numberposts' => -1]);
+        foreach ($seasons as $s) {
+            $start_raw = get_post_meta($s->ID, '_tm_season_start_date', true);
+            $s->tm_start_ts = $start_raw ? strtotime($start_raw) : 0;
+            $end_raw = get_post_meta($s->ID, '_tm_season_end_date', true);
+            $s->tm_end_ts = $end_raw ? strtotime($end_raw) : 0;
+        }
+        usort($seasons, function($a, $b) {
+            return $a->tm_start_ts <=> $b->tm_start_ts;
+        });
+
+        $which = strtolower(trim($atts['which']));
+        if ($which !== 'all') {
+            $today_ts = strtotime(date('Y-m-d'));
+            $current_index = null;
+            foreach ($seasons as $i => $s) {
+                if (!empty($s->tm_start_ts) && !empty($s->tm_end_ts)) {
+                    if ($today_ts > $s->tm_start_ts && $today_ts < $s->tm_end_ts) {
+                        $current_index = $i;
+                        break;
+                    }
+                }
+            }
+
+            $selected = [];
+            if ($which === 'current') {
+                if ($current_index !== null) $selected[] = $seasons[$current_index];
+            } elseif ($which === 'next') {
+                if ($current_index !== null) {
+                    $next_index = $current_index + 1;
+                    if (isset($seasons[$next_index])) $selected[] = $seasons[$next_index];
+                } else {
+                    foreach ($seasons as $s) {
+                        if (!empty($s->tm_start_ts) && $s->tm_start_ts > $today_ts) {
+                            $selected[] = $s;
+                            break;
+                        }
+                    }
+                }
+            } elseif ($which === 'current_and_next' || $which === 'both') {
+                if ($current_index !== null) {
+                    $selected[] = $seasons[$current_index];
+                    $next_index = $current_index + 1;
+                    if (isset($seasons[$next_index])) $selected[] = $seasons[$next_index];
+                } else {
+                    foreach ($seasons as $i => $s) {
+                        if (!empty($s->tm_start_ts) && $s->tm_start_ts > $today_ts) {
+                            $selected[] = $s;
+                            if (isset($seasons[$i+1])) $selected[] = $seasons[$i+1];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!empty($selected)) {
+                $seasons = $selected;
+            }
+        }
+    }
 
     $slot_order = ['Fall', 'Winter', 'Spring'];
     $output = '<div style="'.$style. '" class="tm-season-cast">';
 
-    $shows = get_posts([
-        'post_type' => 'show',
-        'numberposts' => -1,
-        'meta_query' => [
-            [
-                'key' => '_tm_show_season',
-                'value' => $atts['season_id'],
-                'compare' => '='
-            ]
-        ]
-    ]);
+    // For each selected season, fetch shows assigned to that season and render them grouped by time slot
+    if (empty($seasons)) {
+        $output .= '<p><em>No seasons found.</em></p>';
+    } else {
+        foreach ($seasons as $season) {
+            $output .= '<h2 class="tm-season-title">' . esc_html($season->post_title) . '</h2>';
 
-    $grouped = [];
-    foreach ($shows as $show) {
-        $slot = get_post_meta($show->ID, '_tm_show_time_slot', true);
-        if (!isset($grouped[$slot])) {
-            $grouped[$slot] = [];
-        }
-        $grouped[$slot][] = $show;
-    }
+            $shows = get_posts([
+                'post_type' => 'show',
+                'numberposts' => -1,
+                'meta_query' => [
+                    [
+                        'key' => '_tm_show_season',
+                        'value' => $season->ID,
+                        'compare' => '='
+                    ]
+                ]
+            ]);
 
-    foreach ($slot_order as $slot) {
-        if (!isset($grouped[$slot])) continue;
+            $grouped = [];
+            foreach ($shows as $show) {
+                $slot = get_post_meta($show->ID, '_tm_show_time_slot', true);
+                if (!isset($grouped[$slot])) {
+                    $grouped[$slot] = [];
+                }
+                $grouped[$slot][] = $show;
+            }
 
-        $output .= '<h2>' . esc_html($slot) . ' Show</h2>';
-        foreach ($grouped[$slot] as $show) {
+            foreach ($slot_order as $slot) {
+                if (!isset($grouped[$slot])) continue;
+
+                $output .= '<h3>' . esc_html($slot) . ' Show</h3>';
+                foreach ($grouped[$slot] as $show) {
             $img = get_post_meta($show->ID, '_tm_show_sm_image', true);
             $author = get_post_meta($show->ID, '_tm_show_author', true);
             $sub_authors = get_post_meta($show->ID, '_tm_show_sub_authors', true);
@@ -130,7 +208,39 @@ function tm_season_cast_shortcode($atts) {
                 $output .= '<p><em>Cast: TBD</em></p>';
             }
 
+            // Program preview for this show (placed after the cast list)
+            $program_id = get_post_meta($show->ID, '_tm_show_program', true);
+            $program_url = get_post_meta($show->ID, '_tm_show_program_url', true);
+            if (!$program_url && $program_id) $program_url = wp_get_attachment_url($program_id);
+
+            if (!empty($program_id) || !empty($program_url)) {
+                $output .= '<div class="tm-program-section">';
+                $output .= '<h4 class="tm-program-header" style="color: ' . $text_color . ';">Program Preview</h4>';
+                if ($program_id) {
+                    $preview = wp_get_attachment_image_src($program_id, 'medium');
+                    if ($preview) {
+                        $output .= '<div class="tm-program-preview"><a href="' . esc_url($program_url) . '" target="_blank" class="tm-program-link"><img class="tm-program-preview-img" src="' . esc_url($preview[0]) . '" alt="Program preview" /></a></div>';
+                    } else {
+                        $generated = get_post_meta($program_id, '_tm_pdf_preview', true);
+                        if ($generated) {
+                            $output .= '<div class="tm-program-preview"><a href="' . esc_url($program_url) . '" target="_blank" class="tm-program-link"><img class="tm-program-preview-img" src="' . esc_url($generated) . '" alt="Program preview" /></a></div>';
+                        } else {
+                            $output .= '<div class="tm-program-preview"><a href="' . esc_url($program_url) . '" target="_blank" class="tm-program-link">';
+                            $output .= '<canvas class="tm-pdf-canvas" data-pdf="' . esc_attr($program_url) . '" data-width="200" aria-label="Program preview"></canvas>';
+                            $output .= '</a></div>';
+                        }
+                    }
+                } elseif ($program_url) {
+                    $output .= '<div class="tm-program-preview"><a href="' . esc_url($program_url) . '" target="_blank" class="tm-program-link">';
+                    $output .= '<canvas class="tm-pdf-canvas" data-pdf="' . esc_attr($program_url) . '" data-width="200" aria-label="Program preview"></canvas>';
+                    $output .= '</a></div>';
+                }
+                $output .= '</div>'; // close tm-program-section
+            }
+
             $output .= '</div>';
+                }
+            }
         }
     }
 

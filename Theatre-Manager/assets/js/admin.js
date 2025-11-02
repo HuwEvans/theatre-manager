@@ -87,9 +87,35 @@ jQuery(document).ready(function($) {
                 multiple: false
             }).on('select', function() {
                 const attachment = customUploader.state().get('selection').first().toJSON();
+                // determine a sensible preview URL for images/PDFs/icons
+                let previewUrl = '';
+                if (attachment.type === 'image') {
+                    previewUrl = attachment.url;
+                } else if (attachment.sizes) {
+                    if (attachment.sizes.medium) previewUrl = attachment.sizes.medium.url;
+                    else if (attachment.sizes.thumbnail) previewUrl = attachment.sizes.thumbnail.url;
+                    else {
+                        const keys = Object.keys(attachment.sizes);
+                        if (keys.length) previewUrl = attachment.sizes[keys[0]].url;
+                    }
+                } else if (attachment.icon) {
+                    previewUrl = attachment.icon;
+                } else {
+                    // inline small SVG fallback
+                    previewUrl = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24"><rect width="24" height="24" fill="%23f3f4f6"/><text x="12" y="16" font-size="8" text-anchor="middle" fill="%23000">PDF</text></svg>';
+                }
+
                 input.val(attachment.url);
+                // set hidden id if present (convention: input id + '_id' or legacy tm_show_program_id)
+                var inputId = input.attr('id');
+                if (inputId) {
+                    var hid = $('#' + inputId + '_id');
+                    if (hid.length) hid.val(attachment.id);
+                }
+                var legacyId2 = $('#tm_show_program_id');
+                if (legacyId2.length && attachment.id) legacyId2.val(attachment.id);
                 if (previewId) {
-                    $('#' + previewId).attr('src', attachment.url);
+                    $('#' + previewId).attr('src', previewUrl).show();
                 }
             }).open();
         });
@@ -109,6 +135,14 @@ jQuery(document).ready(function($) {
         }).on('select', function() {
             var attachment = customUploader.state().get('selection').first().toJSON();
             input.val(attachment.url);
+            // set hidden id if present
+            var inputId = input.attr('id');
+            if (inputId) {
+                var hid = $('#' + inputId + '_id');
+                if (hid.length) hid.val(attachment.id);
+            }
+            var legacyId3 = $('#tm_show_program_id');
+            if (legacyId3.length && attachment.id) legacyId3.val(attachment.id);
             if (previewId) {
                 $('#' + previewId).attr('src', attachment.url);
             }
@@ -148,9 +182,36 @@ jQuery(document).ready(function($) {
 
         customUploader.on('select', function () {
             const attachment = customUploader.state().get('selection').first().toJSON();
+            let previewUrl = '';
+            if (attachment.type === 'image') {
+                previewUrl = attachment.url;
+            } else if (attachment.sizes) {
+                if (attachment.sizes.medium) previewUrl = attachment.sizes.medium.url;
+                else if (attachment.sizes.thumbnail) previewUrl = attachment.sizes.thumbnail.url;
+                else {
+                    const keys = Object.keys(attachment.sizes);
+                    if (keys.length) previewUrl = attachment.sizes[keys[0]].url;
+                }
+            } else if (attachment.icon) {
+                previewUrl = attachment.icon;
+            } else {
+                previewUrl = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24"><rect width="24" height="24" fill="%23f3f4f6"/><text x="12" y="16" font-size="8" text-anchor="middle" fill="%23000">PDF</text></svg>';
+            }
+
+            // set the visible URL input
             $('#' + targetId).val(attachment.url);
+            // also set a hidden id field if present (convention: targetId + '_id')
+            const idField = $('#' + targetId + '_id');
+            if (idField.length) {
+                idField.val(attachment.id);
+            }
+            // also set legacy hidden field name tm_show_program_id if present
+            const legacyId = $('#tm_show_program_id');
+            if (legacyId.length && attachment.id) {
+                legacyId.val(attachment.id);
+            }
             if (previewId) {
-                $('#' + previewId).attr('src', attachment.url).show();
+                $('#' + previewId).attr('src', previewUrl).show();
             }
         });
 

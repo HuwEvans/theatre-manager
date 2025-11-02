@@ -1,0 +1,175 @@
+# Theatre Manager Plugin Shortcode Reference
+
+This document lists the shortcodes provided by the Theatre Manager plugin, their parameters, admin options (where applicable), and example usage. Each shortcode outputs markup with CSS classes you can override in your theme.
+
+Guidelines
+- Dates: seasons use post meta keys `_tm_season_start_date` and `_tm_season_end_date` (strings parsed with PHP's `strtotime`). The plugin sorts seasons by parsed start date.
+- Season selector: Several shortcodes accept a `which` attribute with values: `all` (default), `current`, `next`, `current_and_next`. `current` is strictly where today &gt; start AND today &lt; end.
+
+## Available Shortcodes
+
+1) [tm_advertisers]
+   Purpose: Displays a grid/list of advertisers (CPT `advertiser`).
+   Parameters:
+   - title (optional): Section title to display above the list
+   - category (optional): Filter by advertiser category slug or name
+   - layout (optional): `grid` (default) or `list`
+   - count (optional): number of advertisers to return (default: all)
+   Example:
+   [tm_advertisers title="Our Supporters" category="platinum" layout="grid" count="6"]
+
+2) [tm_board_members]
+   Purpose: Shows board members CPT in a grid/list.
+   Parameters:
+   - title (optional)
+   - layout (optional): `grid` or `list`
+   Example:
+   [tm_board_members title="Board" layout="grid"]
+
+3) [tm_cast]
+   Purpose: Displays cast members (CPT `cast`). Supports grouping by show.
+   Parameters:
+   - show_id (optional): integer show ID to limit cast to a single show
+   - exclude (optional): comma-separated list of cast fields to hide, e.g. `picture,actor_name,show`
+   - orderby (optional): WP query orderby value (default `title`)
+   - order (optional): `ASC` or `DESC` (default `ASC`)
+   - group_by (optional): `none` (default) or `show` — when `show` the cast is rendered grouped under show titles
+   Examples:
+   - All cast: [tm_cast]
+   - Cast for show 123: [tm_cast show_id="123"]
+   - Grouped by show, hide pictures: [tm_cast group_by="show" exclude="picture"]
+
+4) [tm_contributors]
+   Purpose: Lists contributors/donors (CPT `contributor`).
+   Parameters:
+   - layout (optional): `grid` or `list`
+   - category (optional)
+   Example:
+   [tm_contributors layout="grid"]
+
+5) [tm_programs]
+   Purpose: Displays program/playbill information. Uses program attachment post meta on shows.
+   Parameters:
+   - show_id (optional): specific show
+   - season_id (optional)
+   Example:
+   [tm_programs show_id="123"]
+
+6) [tm_seasons]
+   Purpose: Shows season posts.
+   Parameters:
+   - count (optional): Number of seasons to display (default: all)
+   - layout (optional): `list` or `grid`
+   Example:
+   [tm_seasons count="4" layout="grid"]
+
+7) [tm_shows]
+   Purpose: Displays shows listing, grouped by season and time slot.
+   Parameters:
+   - season_id (optional): ID of a specific season. If omitted, the shortcode may display multiple seasons sorted by start date.
+   - which (optional): One of `all` (default), `current`, `next`, `current_and_next`. Only used when `season_id` is omitted.
+   - exclude (optional): comma-separated list of show fields to exclude (e.g., `sm_image,program`)
+   - layout (optional): `grid` (default) or `list`
+   - count (optional): number of shows to display (default: all)
+   Behavior:
+   - Shows are sorted by the season start date (ascending). Within a season shows are grouped/ordered by time slot: `Fall`, `Winter`, `Spring`. Shows without a season appear last under "Other Shows".
+   Example:
+   [tm_shows which="current" exclude="synopsis" layout="grid"]
+
+8) [tm_sponsor_slider]
+   Purpose: Creates a sliding showcase of sponsors (CPT `sponsor`).
+   Parameters:
+   - category (optional)
+   - speed (optional): milliseconds for autoplay speed (default depends on slider settings)
+   Example:
+   [tm_sponsor_slider category="platinum" speed="4000"]
+
+9) [tm_sponsors]
+   Purpose: Displays sponsors list.
+   Parameters:
+   - category (optional)
+   - layout (optional): `grid` or `list`
+   - title (optional)
+   Example:
+   [tm_sponsors category="gold" layout="grid" title="Our Sponsors"]
+
+10) [tm_testimonials]
+    Purpose: Shows testimonials (CPT `testimonial`) with configurable rating symbol.
+    Parameters:
+    - count (optional): Number of testimonials to display
+    - layout (optional): `slider` or `list` (the shortcode uses Slick slider by default)
+    Admin option (Display → Testimonials):
+    - Option name: `tm_testimonials_rating_symbol`
+    - Default: `Stars`
+    - Available values and behavior:
+      - `Stars` — filled: ★, empty: ☆ (different glyphs)
+      - `Thumbs Up` — filled: 👍, empty: same glyph (displayed faded via CSS filters)
+      - `Rockets` — filled: 🚀, empty: same glyph (displayed faded via CSS filters)
+      - `Hearts` — filled: ❤️, empty: 🤍 (different glyphs)
+      - `Theatre Masks` — filled: 🎭, empty: same glyph (displayed faded via CSS filters)
+    Notes:
+    - Each testimonial stores an integer rating in post meta `_tm_rating` (0–5). The shortcode renders five symbols and uses the selected symbol set.
+    - The `Thumbs Up`, `Rockets` and `Theatre Masks` options use the same glyph for filled and empty and rely on CSS (opacity/grayscale) to make the empty glyph visually distinct.
+    Example:
+    [tm_testimonials count="5" layout="slider"]
+
+11) [tm_show_cast]
+    Purpose: Displays cast for a specific show (wrapper around cast entries filtered by show).
+    Parameters:
+    - show_id (required): ID of the show to display cast for
+    Example:
+    [tm_show_cast show_id="123"]
+
+12) [tm_season_banner]
+    Purpose: Displays the season banner/header (uses season featured image/meta).
+    Parameters:
+    - season_id (required): ID of the season
+    Example:
+    [tm_season_banner season_id="456"]
+
+13) [tm_season_cast]
+    Purpose: Shows cast members grouped by season and show (when `season_id` omitted the `which` selector applies).
+    Parameters:
+    - season_id (optional): ID of the season (omit to use `which`)
+    - which (optional): `all` (default) | `current` | `next` | `current_and_next`
+    - show_cast_images (optional): `true` (default) or `false` — whether to show cast pictures
+    - cast_layout (optional): `grid` (default) or `list`
+    Notes:
+    - After each show's cast the shortcode will render a "Program Preview" when a program attachment or URL exists. The preview prefers a generated thumbnail (`_tm_pdf_preview`), falls back to the attachment image, and finally to a client-side canvas rendering (PDF.js).
+    Example:
+    [tm_season_cast which="current" cast_layout="list" show_cast_images="true"]
+
+14) [tm_season_images]
+    Purpose: Displays an image gallery tied to a season.
+    Parameters:
+    - season_id (required): ID of the season
+    - layout (optional): `grid` or `slider`
+    Example:
+    [tm_season_images season_id="456" layout="grid"]
+
+15) [tm_season_shows]
+    Purpose: Lists shows grouped by season (or filtered to specific seasons).
+    Parameters:
+    - season_id (optional): ID of the season to show (omit to list multiple seasons)
+    - which (optional): `all` (default) | `current` | `next` | `current_and_next`
+    - layout (optional): `grid` or `list`
+    Notes:
+    - Seasons are sorted by `_tm_season_start_date` (earliest first). Current/next selection is based on strict comparisons (today &gt; start AND today &lt; end).
+    Example:
+    [tm_season_shows which="current_and_next" layout="grid"]
+
+## Common Parameter Types
+- layout: accepts values like `grid`, `list`, `slider` depending on shortcode
+- count: integer number of items to return
+- category: string matching a category slug or name
+- *_id: integer ID of the resource (show_id, season_id, etc.)
+
+## Styling and Hooks
+- All shortcodes add semantic CSS classes (for example `.tm-show-card`, `.tm-cast-grid`, `.tm-program-preview`) so you can override styles in your theme or enqueue your own stylesheet.
+- Filters: many shortcodes use WordPress filters in their templates; see the shortcode functions in `includes/shortcodes/` if you need to hook or modify output programmatically.
+
+## Examples (copy/paste)
+- All shows for current season: [tm_shows which="current"]
+- Cast grouped by show (for a specific season): [tm_season_cast season_id="456" group_by="show"]
+- Testimonials slider (5 items): [tm_testimonials count="5" layout="slider"]
+- Show a program preview after each cast: the `tm_season_cast` shortcode does this by default when a program attachment or URL exists.

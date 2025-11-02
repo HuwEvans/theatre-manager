@@ -1,34 +1,107 @@
 <?php
+/**
+ * Shortcode: tm_season_shows
+ * Usage: [tm_season_shows season_id="123" which="all|current|next|current_and_next"]
+ *
+ * - season_id: optional, show only that season
+ * - which: controls selection when season_id omitted:
+ *     all (default) - show all seasons
+ *     current        - show only the current season (today > start && today < end)
+ *     next           - show the next season (after current, or first with start > today)
+ *     current_and_next - show current season and the one after it (or next two upcoming if no current)
+ */
+
 function tm_season_shows_shortcode($atts) {
 
-    $atts = shortcode_atts(['season_id' => 0], $atts);
-	if ($atts['season_id']) {
-	    $seasons = get_posts([
-        'post_type' => 'season',
-        'numberposts' => -1,
-        'p' => $atts['season_id']
-    	]);
+    $atts = shortcode_atts(['season_id' => 0, 'which' => 'all'], $atts);
 
+    // Load seasons
+    if (!empty($atts['season_id'])) {
+        $seasons = get_posts([
+            'post_type' => 'season',
+            'numberposts' => -1,
+            'p' => intval($atts['season_id']),
+        ]);
+    } else {
+        $seasons = get_posts(['post_type' => 'season', 'numberposts' => -1]);
 
-    //	$seasons = get_posts(['post_type' => 'season', 'numberposts' => -1]);		
-	} else {
-    	$seasons = get_posts(['post_type' => 'season', 'numberposts' => -1]);
-	}
-//    $bg_color = get_option('tm_show_bg_color', '#ffffff');
+        // Parse start/end dates into timestamps and sort by start date
+        foreach ($seasons as $s) {
+            $start_raw = get_post_meta($s->ID, '_tm_season_start_date', true);
+            $s->tm_start_ts = $start_raw ? strtotime($start_raw) : 0;
+            $end_raw = get_post_meta($s->ID, '_tm_season_end_date', true);
+            $s->tm_end_ts = $end_raw ? strtotime($end_raw) : 0;
+        }
+        usort($seasons, function($a, $b) {
+            return $a->tm_start_ts <=> $b->tm_start_ts;
+        });
+
+        // Apply 'which' filter if requested
+        $which = strtolower(trim($atts['which']));
+        if ($which !== 'all') {
+            $today_ts = strtotime(date('Y-m-d'));
+            $current_index = null;
+            foreach ($seasons as $i => $s) {
+                if (!empty($s->tm_start_ts) && !empty($s->tm_end_ts)) {
+                    if ($today_ts > $s->tm_start_ts && $today_ts < $s->tm_end_ts) {
+                        $current_index = $i;
+                        break;
+                    }
+                }
+            }
+
+            $selected = [];
+            if ($which === 'current') {
+                if ($current_index !== null) $selected[] = $seasons[$current_index];
+            } elseif ($which === 'next') {
+                if ($current_index !== null) {
+                    $next_index = $current_index + 1;
+                    if (isset($seasons[$next_index])) $selected[] = $seasons[$next_index];
+                } else {
+                    foreach ($seasons as $s) {
+                        if (!empty($s->tm_start_ts) && $s->tm_start_ts > $today_ts) {
+                            $selected[] = $s;
+                            break;
+                        }
+                    }
+                }
+            } elseif ($which === 'current_and_next' || $which === 'both') {
+                if ($current_index !== null) {
+                    $selected[] = $seasons[$current_index];
+                    $next_index = $current_index + 1;
+                    if (isset($seasons[$next_index])) $selected[] = $seasons[$next_index];
+                } else {
+                    foreach ($seasons as $i => $s) {
+                        if (!empty($s->tm_start_ts) && $s->tm_start_ts > $today_ts) {
+                            $selected[] = $s;
+                            if (isset($seasons[$i+1])) $selected[] = $seasons[$i+1];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!empty($selected)) {
+                $seasons = $selected;
+            }
+        }
+    }
+
+    // Styling and output
     $text_color = get_option('tm_show_text_color', '#000000');
-	$border_color = get_option('tm_show_border_color', '#000000');
+    $border_color = get_option('tm_show_border_color', '#000000');
     $border_width = get_option('tm_show_border_width', '0');
     $rounded = get_option('tm_show_rounded') ? 'true' : 'false';
     $border_radius = get_option('tm_show_radius', '20');
     $shadow = get_option('tm_show_shadow') ? 'true' : 'false';
-	
-	$style = 'color:' . $text_color . '; ; border-width: ' . $border_width . ';border-color: ' . $border_color . '; border-radius: ' . $border_radius . '; border-style: solid;';
-	if ($shadow === true) {
-		$style = $style . ' box-shadow: 5px 10px;';
-	}
-	$style = $style .  '}';
 
-    $output = '<div style="' . $style . '" class="tm-season-shows">';
+    $style = 'color:' . esc_attr($text_color) . '; ; border-width: ' . esc_attr($border_width) . ';border-color: ' . esc_attr($border_color) . '; border-radius: ' . esc_attr($border_radius) . '; border-style: solid;';
+    if ($shadow === true) {
+        $style = $style . ' box-shadow: 5px 10px;';
+    }
+    $style = $style .  '}';
+
+    $output = '<div style="' . esc_attr($style) . '" class="tm-season-shows">';
 
     $slot_order = ['Fall', 'Winter', 'Spring'];
 
@@ -55,10 +128,9 @@ function tm_season_shows_shortcode($atts) {
             }
             $grouped[$slot][] = $show;
         }
-            $output .= '<div class="tm-show-grid">'; // Start grid container
+        $output .= '<div class="tm-show-grid">'; // Start grid container
         foreach ($slot_order as $slot) {
             if (!isset($grouped[$slot])) continue;
-
 
             foreach ($grouped[$slot] as $show) {
                 $img = get_post_meta($show->ID, '_tm_show_sm_image', true);
@@ -68,7 +140,7 @@ function tm_season_shows_shortcode($atts) {
                 $associate_director = get_post_meta($show->ID, '_tm_show_associate_director', true);
 
                 $output .= '<div class="tm-show-card">';
-            $output .= '<h3 style="color:' . esc_html($text_color) .';">' . esc_html($slot) . ' Show</h3>';
+                $output .= '<h3 style="color:' . esc_html($text_color) .';">' . esc_html($slot) . ' Show</h3>';
                 if ($img) {
                     $output .= '<img src="' . esc_url($img) . '" alt="' . esc_attr($show->post_title) . '" class="tm-show-image">';
                 }
@@ -91,7 +163,7 @@ function tm_season_shows_shortcode($atts) {
             }
 
         }
-            $output .= '</div>'; // End grid container
+        $output .= '</div>'; // End grid container
 
     }
 
