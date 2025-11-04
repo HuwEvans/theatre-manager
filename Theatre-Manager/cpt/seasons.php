@@ -43,11 +43,22 @@ function tm_render_season_fields($post) {
     $image_front = get_post_meta($post->ID, '_tm_season_image_front', true);
     $image_back = get_post_meta($post->ID, '_tm_season_image_back', true);
     $social_banner = get_post_meta($post->ID, '_tm_season_social_banner', true);
+    $sm_square = get_post_meta($post->ID, '_tm_season_sm_square', true);
+    $sm_portrait = get_post_meta($post->ID, '_tm_season_sm_portrait', true);
+    $is_current = get_post_meta($post->ID, '_tm_season_is_current', true);
+    $is_upcoming = get_post_meta($post->ID, '_tm_season_is_upcoming', true);
 
     echo '<p><label>Name:<br><input type="text" name="tm_season_name" value="' . esc_attr($name) . '" class="widefat" /></label></p>';
     echo '<p><label>Start Date:<br><input type="date" name="tm_season_start_date" value="' . esc_attr($start_date) . '" class="widefat tm-datepicker" /></label></p>';
     echo '<p><label>End Date:<br><input type="date" name="tm_season_end_date" value="' . esc_attr($end_date) . '" class="widefat tm-datepicker" /></label></p>';
 
+    echo '<p>';
+    echo '<label><input type="checkbox" name="tm_season_is_current" value="1" ' . checked($is_current, 1, false) . ' /> Is Current Season</label>';
+    echo '</p>';
+    
+    echo '<p>';
+    echo '<label><input type="checkbox" name="tm_season_is_upcoming" value="1" ' . checked($is_upcoming, 1, false) . ' /> Is Upcoming Season</label>';
+    echo '</p>';
 
 	echo '<label for="tm_season_image_front">3-up Front Image:</label>';
 	echo '<input type="text" name="tm_season_image_front" id="tm_season_image_front" value="' . esc_attr($image_front) . '" class="widefat" />';
@@ -59,10 +70,20 @@ function tm_render_season_fields($post) {
 	echo '<button type="button" class="button tm-media-button" data-target="tm_season_image_back" data-preview="tm_season_image_back_preview">Select Image</button>';
 	echo '<div><img id="tm_season_image_back_preview" src="' . esc_url($image_back) . '" style="max-width:150px;' . ($image_back ? '' : ' display:none;') . '" /></div>';
 	
-	echo '<label for="tm_season_social_banner">Social Banner:</label>';
+	echo '<label for="tm_season_social_banner">Website Banner:</label>';
 	echo '<input type="text" name="tm_season_social_banner" id="tm_season_social_banner" value="' . esc_attr($social_banner) . '" class="widefat" />';
 	echo '<button type="button" class="button tm-media-button" data-target="tm_season_social_banner" data-preview="tm_season_social_banner_preview">Select Image</button>';
 	echo '<div><img id="tm_season_social_banner_preview" src="' . esc_url($social_banner) . '" style="max-width:150px;' . ($social_banner ? '' : ' display:none;') . '" /></div>';
+
+	echo '<label for="tm_season_sm_square">Social Media Square:</label>';
+	echo '<input type="text" name="tm_season_sm_square" id="tm_season_sm_square" value="' . esc_attr($sm_square) . '" class="widefat" />';
+	echo '<button type="button" class="button tm-media-button" data-target="tm_season_sm_square" data-preview="tm_season_sm_square_preview">Select Image</button>';
+	echo '<div><img id="tm_season_sm_square_preview" src="' . esc_url($sm_square) . '" style="max-width:150px;' . ($sm_square ? '' : ' display:none;') . '" /></div>';
+
+	echo '<label for="tm_season_sm_portrait">Social Media Portrait:</label>';
+	echo '<input type="text" name="tm_season_sm_portrait" id="tm_season_sm_portrait" value="' . esc_attr($sm_portrait) . '" class="widefat" />';
+	echo '<button type="button" class="button tm-media-button" data-target="tm_season_sm_portrait" data-preview="tm_season_sm_portrait_preview">Select Image</button>';
+	echo '<div><img id="tm_season_sm_portrait_preview" src="' . esc_url($sm_portrait) . '" style="max-width:150px;' . ($sm_portrait ? '' : ' display:none;') . '" /></div>';
 
 }
 
@@ -78,6 +99,10 @@ function tm_save_season_fields($post_id) {
     update_post_meta($post_id, '_tm_season_image_front', esc_url_raw($_POST['tm_season_image_front']));
     update_post_meta($post_id, '_tm_season_image_back', esc_url_raw($_POST['tm_season_image_back']));
     update_post_meta($post_id, '_tm_season_social_banner', esc_url_raw($_POST['tm_season_social_banner']));
+    update_post_meta($post_id, '_tm_season_sm_square', esc_url_raw($_POST['tm_season_sm_square'] ?? ''));
+    update_post_meta($post_id, '_tm_season_sm_portrait', esc_url_raw($_POST['tm_season_sm_portrait'] ?? ''));
+    update_post_meta($post_id, '_tm_season_is_current', isset($_POST['tm_season_is_current']) ? 1 : 0);
+    update_post_meta($post_id, '_tm_season_is_upcoming', isset($_POST['tm_season_is_upcoming']) ? 1 : 0);
 
     remove_action('save_post', 'tm_save_season_fields');
     wp_update_post(array('ID' => $post_id, 'post_title' => $name));
@@ -91,9 +116,13 @@ function tm_season_columns($columns) {
         'title' => 'Season Name',
         'start_date' => 'Start Date',
         'end_date' => 'End Date',
+        'is_current' => 'Current',
+        'is_upcoming' => 'Upcoming',
         'image_front' => 'Front Image',
         'image_back' => 'Back Image',
-        'social_banner' => 'Social Banner',
+        'social_banner' => 'Website Banner',
+        'sm_square' => 'Social Square',
+        'sm_portrait' => 'Social Portrait',
 		'post_id' => 'ID'
     );
 }
