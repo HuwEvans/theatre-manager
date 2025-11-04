@@ -181,7 +181,10 @@ function tm_season_cast_shortcode($atts) {
                         if ($atts['show_cast_images'] === 'true') {
                             $output .= '<td>';
                             if ($picture) {
-                                $output .= '<img src="' . esc_url($picture) . '" alt="' . esc_attr($character) . '" style="max-width:50px;">';
+                                $picture_url = tm_get_image_url($picture);
+                                if ($picture_url) {
+                                    $output .= '<img src="' . esc_url($picture_url) . '" alt="' . esc_attr($character) . '" style="max-width:50px;">';
+                                }
                             }
                             $output .= '</td>';
                         }

@@ -22,11 +22,14 @@ function tm_render_cast_member_by_id($post_id, $exclude = array(), $show_output 
     }
 
     if (!in_array('picture', $exclude)) {
-        $value = get_post_meta($post_id, '_tm_cast_picture', true);
-        if ($value) {
-            $output .= '<div class="tm-cast-image">';
-            $output .= '<img src="' . esc_url($value) . '" alt="' . esc_attr(get_the_title($post_id)) . '" />';
-            $output .= '</div>';
+        $image_value = get_post_meta($post_id, '_tm_cast_picture', true);
+        if ($image_value) {
+            $image_url = tm_get_image_url($image_value);
+            if ($image_url) {
+                $output .= '<div class="tm-cast-image">';
+                $output .= '<img src="' . esc_url($image_url) . '" alt="' . esc_attr(get_the_title($post_id)) . '" />';
+                $output .= '</div>';
+            }
         }
     }
 

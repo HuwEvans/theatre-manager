@@ -137,15 +137,18 @@ function tm_sponsor_shortcode($atts) {
                 echo '<div class="tm-sponsor-card" style="' . esc_attr($style) . '">';
 
                 if ($show_logo && !empty($entry['logo'])) {
-                    echo '<div>';
-                    if (!empty($entry['website']) && $show_website) {
-                        echo '<a href="' . esc_url($entry['website']) . '" target="_blank">';
-                        echo '<img src="' . esc_url($entry['logo']) . '" alt="Logo" />';
-                        echo '</a>';
-                    } else {
-                        echo '<img src="' . esc_url($entry['logo']) . '" alt="Logo" />';
+                    $logo_url = tm_get_image_url($entry['logo']);
+                    if ($logo_url) {
+                        echo '<div>';
+                        if (!empty($entry['website']) && $show_website) {
+                            echo '<a href="' . esc_url($entry['website']) . '" target="_blank">';
+                            echo '<img src="' . esc_url($logo_url) . '" alt="Logo" />';
+                            echo '</a>';
+                        } else {
+                            echo '<img src="' . esc_url($logo_url) . '" alt="Logo" />';
+                        }
+                        echo '</div>';
                     }
-                    echo '</div>';
                 }
 
                 if ($show_name) {

@@ -142,7 +142,12 @@ function tm_shortcode_shows($atts) {
         // Show image first if available
         if (!in_array('sm_image', $exclude)) {
             $value = get_post_meta($id, '_tm_show_sm_image', true);
-            if ($value) echo '<div class="tm-show-image"><img src="' . esc_url($value) . '" alt="Show image" /></div>';
+            if ($value) {
+                $img_url = tm_get_image_url($value);
+                if ($img_url) {
+                    echo '<div class="tm-show-image"><img src="' . esc_url($img_url) . '" alt="Show image" /></div>';
+                }
+            }
         }
 
         // Show title with proper color
@@ -213,7 +218,12 @@ function tm_shortcode_shows($atts) {
             // Show content rendering (same as above)
             if (!in_array('sm_image', $exclude)) {
                 $value = get_post_meta($id, '_tm_show_sm_image', true);
-                if ($value) echo '<div class="tm-show-image"><img src="' . esc_url($value) . '" alt="Show image" /></div>';
+                if ($value) {
+                    $img_url = tm_get_image_url($value);
+                    if ($img_url) {
+                        echo '<div class="tm-show-image"><img src="' . esc_url($img_url) . '" alt="Show image" /></div>';
+                    }
+                }
             }
             
             echo '<h3 class="tm-show-title" style="color: ' . $text_color . ';">' . esc_html($show->post_title) . '</h3>';

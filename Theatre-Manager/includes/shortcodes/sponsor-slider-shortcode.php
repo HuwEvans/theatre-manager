@@ -37,11 +37,14 @@ function tm_sponsor_slider_shortcode($atts) {
             $website = get_post_meta(get_the_ID(), '_tm_website', true);
 
             if ($banner && $website) {
-                echo '<div class="tm-sponsor-slide">';
-                echo '<a href="' . esc_url($website) . '" target="_blank">';
-                echo '<img src="' . esc_url($banner) . '" alt="' . esc_attr(get_the_title()) . '" />';
-                echo '</a>';
-                echo '</div>';
+                $banner_url = tm_get_image_url($banner);
+                if ($banner_url) {
+                    echo '<div class="tm-sponsor-slide">';
+                    echo '<a href="' . esc_url($website) . '" target="_blank">';
+                    echo '<img src="' . esc_url($banner_url) . '" alt="' . esc_attr(get_the_title()) . '" />';
+                    echo '</a>';
+                    echo '</div>';
+                }
             }
         }
         echo '</div>'; // .tm-sponsor-slider

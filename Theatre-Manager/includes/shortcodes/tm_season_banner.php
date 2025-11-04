@@ -8,11 +8,12 @@ function tm_season_banner_shortcode($atts) {
 
     foreach ($fields as $field) {
         $img = get_post_meta($atts['season_id'], $field, true);
-        if (($img) && ($field == '_tm_season_social_banner')) {
-            $output .= '<img src="' . esc_url($img) . '" alt="Season Image">';
-        } else {
-            //$output .= '<img src="' . esc_url($img) . '" alt="Season Image" style="display: inline-block;width:45%">';		
-		}
+        if ($img && $field == '_tm_season_social_banner') {
+            $img_url = tm_get_image_url($img);
+            if ($img_url) {
+                $output .= '<img src="' . esc_url($img_url) . '" alt="Season Image">';
+            }
+        }
     }
 
     $output .= '</div>';

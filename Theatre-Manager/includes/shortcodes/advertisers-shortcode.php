@@ -58,7 +58,10 @@ function tm_advertiser_shortcode($atts) {
                     ? get_post_meta(get_the_ID(), '_tm_logo', true)
                     : get_post_meta(get_the_ID(), '_tm_banner', true);
                 if ($image) {
-                    echo '<div class="tm-advertiser-slide"><img src="' . esc_url($image) . '" alt="' . esc_attr(get_the_title()) . '" /></div>';
+                    $image_url = tm_get_image_url($image);
+                    if ($image_url) {
+                        echo '<div class="tm-advertiser-slide"><img src="' . esc_url($image_url) . '" alt="' . esc_attr(get_the_title()) . '" /></div>';
+                    }
                 }
             }
             echo '</div>';
@@ -72,13 +75,16 @@ function tm_advertiser_shortcode($atts) {
                 $logo = get_post_meta(get_the_ID(), '_tm_logo', true);
                 $website = get_post_meta(get_the_ID(), '_tm_website', true);
                 if ($logo) {
-                    echo '<div class="tm-advertiser-entry" style="' . esc_attr($style) . '">';
-                    if ($website) {
-                        echo '<a href="' . esc_url($website) . '" target="_blank"><img src="' . esc_url($logo) . '" alt="' . esc_attr(get_the_title()) . '" /></a>';
-                    } else {
-                        echo '<img src="' . esc_url($logo) . '" alt="' . esc_attr(get_the_title()) . '" />';
+                    $logo_url = tm_get_image_url($logo);
+                    if ($logo_url) {
+                        echo '<div class="tm-advertiser-entry" style="' . esc_attr($style) . '">';
+                        if ($website) {
+                            echo '<a href="' . esc_url($website) . '" target="_blank"><img src="' . esc_url($logo_url) . '" alt="' . esc_attr(get_the_title()) . '" /></a>';
+                        } else {
+                            echo '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr(get_the_title()) . '" />';
+                        }
+                        echo '</div>';
                     }
-                    echo '</div>';
                 }
             }
             echo '</div>';

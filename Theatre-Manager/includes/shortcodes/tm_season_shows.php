@@ -142,7 +142,10 @@ function tm_season_shows_shortcode($atts) {
                 $output .= '<div class="tm-show-card">';
                 $output .= '<h3 style="color:' . esc_html($text_color) .';">' . esc_html($slot) . ' Show</h3>';
                 if ($img) {
-                    $output .= '<img src="' . esc_url($img) . '" alt="' . esc_attr($show->post_title) . '" class="tm-show-image">';
+                    $img_url = tm_get_image_url($img);
+                    if ($img_url) {
+                        $output .= '<img src="' . esc_url($img_url) . '" alt="' . esc_attr($show->post_title) . '" class="tm-show-image">';
+                    }
                 }
                 $output .= '<h4 style="color:' . esc_html($text_color) .';">' . esc_html($show->post_title) . '</h4>';
 
