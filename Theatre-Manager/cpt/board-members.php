@@ -30,14 +30,12 @@ function tm_add_board_member_meta_boxes() {
 add_action('add_meta_boxes', 'tm_add_board_member_meta_boxes');
 
 // Meta Box Callback
-// Meta Box Callback
 function tm_board_member_meta_box_callback($post) {
     wp_nonce_field('tm_save_board_member_meta', 'tm_board_member_nonce');
 
     $position = get_post_meta($post->ID, '_tm_position', true);
     $name = get_post_meta($post->ID, '_tm_name', true);
-    $media_urls = get_post_meta($post->ID, '_tm_media_urls', true);
-    $media_urls_array = !empty($media_urls) ? explode(',', $media_urls) : array();
+    $photo = get_post_meta($post->ID, '_tm_photo', true);
 
     echo '<div class="tm-board-member">';
     echo '<label>Position:</label><br>';
@@ -46,19 +44,26 @@ function tm_board_member_meta_box_callback($post) {
     echo '<label>Name:</label><br>';
     echo '<input type="text" name="tm_name" value="' . esc_attr($name) . '" /><br><br>';
 
-    echo '<label>Media (Images/Videos):</label><br>';
-    echo '<input type="hidden" name="tm_media_urls" id="tm_media_urls" value="' . esc_attr($media_urls) . '" />';
-    echo '<div id="tm_media_preview">';
-    foreach ($media_urls_array as $url) {
-        $url = trim($url);
-        if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $url)) {
-            echo '<img src="' . esc_url($url) . '" style="max-width:150px; margin:5px;" />';
-        } elseif (preg_match('/\.(mp4|webm|ogg)$/i', $url)) {
-            echo '<video src="' . esc_url($url) . '" controls style="max-width:150px; margin:5px;"></video>';
+    echo '<label>Photo:</label><br>';
+    echo '<div id="tm_photo_preview" style="margin-bottom: 10px;">';
+    if (!empty($photo)) {
+        if (is_numeric($photo)) {
+            // It's an attachment ID
+            $photo_url = wp_get_attachment_url($photo);
+            if ($photo_url) {
+                echo '<img src="' . esc_url($photo_url) . '" style="max-width:200px; height:auto; margin-bottom:10px;" />';
+            }
+        } else {
+            // It's a direct URL
+            echo '<img src="' . esc_url($photo) . '" style="max-width:200px; height:auto; margin-bottom:10px;" />';
         }
     }
     echo '</div>';
-    echo '<button type="button" class="button" id="tm_media_button">Select Media</button>';
+    echo '<input type="hidden" name="tm_photo" id="tm_photo" value="' . esc_attr($photo) . '" />';
+    echo '<button type="button" class="button" id="tm_photo_button">Select Photo</button>';
+    if (!empty($photo)) {
+        echo ' <button type="button" class="button" id="tm_photo_remove_button">Remove Photo</button>';
+    }
     echo '</div>';
 }
 
@@ -71,12 +76,11 @@ function tm_save_board_member_meta($post_id) {
 
     $position = sanitize_text_field($_POST['tm_position'] ?? '');
     $name = sanitize_text_field($_POST['tm_name'] ?? '');
-    $media_urls_raw = $_POST['tm_media_urls'] ?? '';
-    $media_urls_clean = implode(',', array_map('esc_url_raw', array_filter(array_map('trim', explode(',', $media_urls_raw)))));
+    $photo = sanitize_text_field($_POST['tm_photo'] ?? '');
 
     update_post_meta($post_id, '_tm_position', $position);
     update_post_meta($post_id, '_tm_name', $name);
-    update_post_meta($post_id, '_tm_media_urls', $media_urls_clean);
+    update_post_meta($post_id, '_tm_photo', $photo);
 
     // Auto-set post title from Name
     remove_action('save_post', 'tm_save_board_member_meta');
@@ -105,13 +109,17 @@ function tm_board_member_custom_column($column, $post_id) {
     } elseif ($column === 'name') {
         echo esc_html(get_post_meta($post_id, '_tm_name', true));
     } elseif ($column === 'picture') {
-        $media_urls = get_post_meta($post_id, '_tm_media_urls', true);
-        $urls = array_filter(array_map('trim', explode(',', $media_urls)));
-        foreach ($urls as $url) {
-            if (preg_match('/\.(jpg|jpeg|png|gif)$/i', $url)) {
-                echo '<img src="' . esc_url($url) . '" style="max-width:50px; height:auto; margin-right:5px;" />';
-            } elseif (preg_match('/\.(mp4|webm|ogg)$/i', $url)) {
-                echo '<span class="dashicons dashicons-format-video" title="Video file" style="font-size:20px; margin-right:5px;"></span>';
+        $photo = get_post_meta($post_id, '_tm_photo', true);
+        if (!empty($photo)) {
+            if (is_numeric($photo)) {
+                // It's an attachment ID
+                $photo_url = wp_get_attachment_url($photo);
+                if ($photo_url) {
+                    echo '<img src="' . esc_url($photo_url) . '" style="max-width:50px; height:auto; margin-right:5px;" />';
+                }
+            } else {
+                // It's a direct URL
+                echo '<img src="' . esc_url($photo) . '" style="max-width:50px; height:auto; margin-right:5px;" />';
             }
         }
     }
