@@ -1,5 +1,14 @@
 # Theatre Manager - Changelog
 
+## [2.6] - 2025-11-04
+
+### Fixed
+- **Sponsors Sync Support**: Plugin now properly supports all sponsor fields synced by tm-sync 2.6
+- **Shows/Seasons/Cast Display**: Updated to work with new complete field mapping from tm-sync
+
+### Changed
+- **Compatibility**: Now requires tm-sync 2.6+ for full Seasons/Shows/Cast functionality
+
 ## [2.5] - 2025-11-04
 
 ### Added

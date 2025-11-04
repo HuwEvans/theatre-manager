@@ -3,7 +3,7 @@
  * Plugin Name: Theatre Manager
  * Plugin URI: https://miltonplayers.com/plugin
  * Description: Manage theatre-related content including board members, shows, and more.
- * Version: 2.5
+ * Version: 2.6
  * Requires at least: 6.8.2
  * Requires PHP: 
  * Author: Huw Evans

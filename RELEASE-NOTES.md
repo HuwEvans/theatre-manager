@@ -1,24 +1,28 @@
-# Theatre Manager v2.5 - Release Package
+# Theatre Manager v2.6 - Release Package
 
 **Release Date:** November 4, 2025
 
 ## Installation
 
-1. Extract `Theatre-Manager-2.5.zip` into your WordPress plugins directory
+1. Extract `Theatre-Manager-2.6.zip` into your WordPress plugins directory
 2. The folder should be named `Theatre-Manager`
 3. Activate the plugin from WordPress Admin
-4. Optionally: Install Theatre Manager Sync v2.5 for SharePoint integration
+4. Optionally: Install Theatre Manager Sync v2.6 for SharePoint integration
 
 ## What's Included
 
-- Complete Theatre Manager plugin v2.5
+- Complete Theatre Manager plugin v2.6
 - 8 Custom Post Type definitions (Advertisers, Board Members, Cast, Contributors, Seasons, Shows, Sponsors, Testimonials)
 - 15+ shortcodes for frontend display
 - Admin settings and display customization options
-- Backwards compatible with Theatre Manager Sync plugin
+- Full compatibility with Theatre Manager Sync v2.6
 
-## Key Features in v2.5
+## Key Features in v2.6
 
+✅ **Complete Seasons Display** - All season fields and images working properly
+✅ **Complete Shows Display** - Full show details with season relationships
+✅ **Complete Cast Display** - Cast members linked to shows with images
+✅ **Relationship Display** - Seasons→Shows→Cast hierarchy working correctly
 ✅ **Image Display Fixes** - All shortcodes now properly display synced images
 ✅ **Board Member Display** - Fixed names and photos showing correctly
 ✅ **Testimonials Ratings** - Star ratings display from SharePoint data
@@ -48,6 +52,7 @@ Season-specific shortcodes:
 
 - WordPress 5.0+
 - PHP 7.4+
+- Theatre Manager Sync v2.6+ (for complete field syncing)
 - Optional: Theatre Manager Sync plugin 2.5+ for SharePoint integration
 
 ## Documentation
