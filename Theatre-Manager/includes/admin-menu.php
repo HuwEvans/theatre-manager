@@ -169,6 +169,24 @@ function tm_register_display_settings() {
         add_settings_field("tm_{$tab}_shadow", 'Border Shadow', 'tm_checkbox_callback', $page, $section_id, ['label_for' => "tm_{$tab}_shadow"]);
         register_setting($group, "tm_{$tab}_shadow");
 
+        add_settings_field("tm_{$tab}_h1_color", 'H1 Text Color', 'tm_color_picker_callback', $page, $section_id, ['label_for' => "tm_{$tab}_h1_color"]);
+        register_setting($group, "tm_{$tab}_h1_color");
+
+        add_settings_field("tm_{$tab}_h2_color", 'H2 Text Color', 'tm_color_picker_callback', $page, $section_id, ['label_for' => "tm_{$tab}_h2_color"]);
+        register_setting($group, "tm_{$tab}_h2_color");
+
+        add_settings_field("tm_{$tab}_h3_color", 'H3 Text Color', 'tm_color_picker_callback', $page, $section_id, ['label_for' => "tm_{$tab}_h3_color"]);
+        register_setting($group, "tm_{$tab}_h3_color");
+
+        add_settings_field("tm_{$tab}_h4_color", 'H4 Text Color', 'tm_color_picker_callback', $page, $section_id, ['label_for' => "tm_{$tab}_h4_color"]);
+        register_setting($group, "tm_{$tab}_h4_color");
+
+        add_settings_field("tm_{$tab}_h5_color", 'H5 Text Color', 'tm_color_picker_callback', $page, $section_id, ['label_for' => "tm_{$tab}_h5_color"]);
+        register_setting($group, "tm_{$tab}_h5_color");
+
+        add_settings_field("tm_{$tab}_h6_color", 'H6 Text Color', 'tm_color_picker_callback', $page, $section_id, ['label_for' => "tm_{$tab}_h6_color"]);
+        register_setting($group, "tm_{$tab}_h6_color");
+
         if ($tab === 'testimonials') {
             add_settings_field("tm_{$tab}_rating_symbol", 'Rating Symbol', 'tm_rating_symbol_callback', $page, $section_id, ['label_for' => "tm_{$tab}_rating_symbol"]);
             register_setting($group, "tm_{$tab}_rating_symbol");
@@ -178,6 +196,9 @@ function tm_register_display_settings() {
 			add_settings_field("tm_{$tab}_grid_columns", 'Grid Columns', 'tm_grid_columns_callback', $page, $section_id, ['label_for' => "tm_{$tab}_grid_columns"]);
 			register_setting($group, "tm_{$tab}_grid_columns");
 		}
+		
+		add_settings_field("tm_{$tab}_disable_border", 'Disable Border', 'tm_checkbox_callback', $page, $section_id, ['label_for' => "tm_{$tab}_disable_border"]);
+        register_setting($group, "tm_{$tab}_disable_border");
     }
 }
 add_action('admin_init', 'tm_register_display_settings');

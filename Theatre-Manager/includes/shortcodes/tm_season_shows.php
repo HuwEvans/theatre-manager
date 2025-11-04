@@ -168,6 +168,28 @@ function tm_season_shows_shortcode($atts) {
     }
 
     $output .= '</div>';
+
+    // Fetch header colors dynamically
+    $header_colors = [];
+    foreach (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as $header) {
+        $header_colors[$header] = get_option("tm_season_{$header}_color", ''); // No default value here
+    }
+
+    // Generate styles for headers
+    $output .= '<style>';
+    foreach ($header_colors as $header => $color) {
+        if (!empty($color)) {
+            $output .= ".tm-season-shows {$header} { color: {$color}; }";
+        }
+    }
+    $output .= '</style>';
+
+    $h2_color = get_option('tm_season_h2_color', '#851212ff');
+
+    echo '<style>';
+    echo ".tm-season-shows h2 { color: {$h2_color}; }";
+    echo '</style>';
+
     return $output;
 }
 add_shortcode('tm_season_shows', 'tm_season_shows_shortcode');

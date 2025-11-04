@@ -8,7 +8,6 @@ defined('ABSPATH') || exit;
 
 function tm_board_member_shortcode($atts) {
 
-
     $args = array(
         'post_type' => 'board_member',
         'posts_per_page' => -1,
@@ -16,14 +15,40 @@ function tm_board_member_shortcode($atts) {
     );
     $query = new WP_Query($args);
 
+    // Define sorting rules
+    $priority_roles = ['President', 'Vice-President', 'Treasurer', 'Secretary'];
+
+    // Custom sorting function
+    if ($query->have_posts()) {
+        usort($query->posts, function ($a, $b) use ($priority_roles) {
+            $position_a = get_post_meta($a->ID, '_tm_position', true);
+            $position_b = get_post_meta($b->ID, '_tm_position', true);
+
+            $index_a = array_search($position_a, $priority_roles);
+            $index_b = array_search($position_b, $priority_roles);
+
+            // Prioritize predefined roles
+            if ($index_a !== false && $index_b !== false) {
+                return $index_a - $index_b;
+            } elseif ($index_a !== false) {
+                return -1;
+            } elseif ($index_b !== false) {
+                return 1;
+            }
+
+            // Alphabetical sorting for other roles
+            return strcmp($position_a, $position_b);
+        });
+    }
+
     $bg_color = get_option('tm_board_member_bg_color', '#ffffff');
     $text_color = get_option('tm_board_member_text_color', '#000000');
-	$border_color = get_option('tm_board_member_border_color', '#000000');
+    $border_color = get_option('tm_board_member_border_color', '#000000');
     $border_width = get_option('tm_board_member_border_width', '0');
     $rounded = get_option('tm_board_member_rounded') ? 'true' : 'false';
     $border_radius = get_option('tm_board_member_radius', '20');
     $shadow = get_option('tm_board_member_shadow') ? 'true' : 'false';
-	$grid_columns = get_option('tm_board_member_grid_columns', '1');
+    $grid_columns = get_option('tm_board_member_grid_columns', '1');
     $atts = shortcode_atts([
         'show_photos' => 'true',
         'columns' => $grid_columns,
@@ -85,11 +110,10 @@ function tm_board_member_shortcode($atts) {
     ob_start();
     if ($query->have_posts()) {
         echo '<div class="tm-board-members-grid">';
-        while ($query->have_posts()) {
-            $query->the_post();
-            $company = get_post_meta(get_the_ID(), '_tm_company', true);
-            $position = get_post_meta(get_the_ID(), '_tm_position', true);
-            $photo = get_post_meta(get_the_ID(), '_tm_media_urls', true);
+        foreach ($query->posts as $post) {
+            $company = get_post_meta($post->ID, '_tm_company', true);
+            $position = get_post_meta($post->ID, '_tm_position', true);
+            $photo = get_post_meta($post->ID, '_tm_media_urls', true);
 
             echo '<div class="tm-board-member-card" style="flex: 0 0 ' . $card_width . '; ' . esc_attr($style) . '">';
             
@@ -97,7 +121,7 @@ function tm_board_member_shortcode($atts) {
                 echo '<img src="' . esc_url($photo) . '" alt="Photo" />';
             }
 
-            echo '<h4>' . esc_html(get_the_title()) . '</h4>';
+            echo '<h4>' . esc_html(get_the_title($post)) . '</h4>';
 
             if ($position) {
                 echo '<div class="tm-position-bottom"><p><strong></strong> ' . esc_html($position) . '</p></div>';

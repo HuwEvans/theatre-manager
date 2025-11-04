@@ -191,3 +191,15 @@ function tm_generate_pdf_preview($attachment_id) {
         return array('success' => false, 'message' => 'Exception: ' . $e->getMessage());
     }
 }
+
+/**
+ * Register header text color options for h1 through h6
+ */
+function tm_register_header_text_color_options() {
+    $header_levels = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+
+    foreach ($header_levels as $header) {
+        register_setting('tm_display_options', "tm_{$header}_text_color");
+    }
+}
+add_action('admin_init', 'tm_register_header_text_color_options');

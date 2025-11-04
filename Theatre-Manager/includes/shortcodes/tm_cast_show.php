@@ -24,6 +24,17 @@ function tm_show_cast_shortcode($atts) {
     }
     $output .= '</div>';
 
+    $header_colors = [];
+    foreach (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as $header) {
+        $header_colors[$header] = get_option("tm_{$header}_text_color", '#000000');
+    }
+
+    echo '<style>';
+    foreach ($header_colors as $header => $color) {
+        echo ".tm-show-cast {$header} { color: {$color}; }";
+    }
+    echo '</style>';
+
     return $output;
 }
 add_shortcode('tm_show_cast', 'tm_show_cast_shortcode');

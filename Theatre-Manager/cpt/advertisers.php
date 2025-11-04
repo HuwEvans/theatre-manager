@@ -44,7 +44,21 @@ function tm_advertiser_meta_box_callback($post) {
 
     echo '<label>Logo:</label><br>';
     echo '<input type="hidden" name="tm_logo" id="tm_logo" value="' . esc_attr($logo) . '" />';
-    echo '<img id="tm_logo_preview" src="' . esc_url($logo) . '" style="max-width:150px; display:block; margin-bottom:10px;" />';
+    
+    // Display logo preview (handle both attachment IDs and URLs)
+    if (!empty($logo)) {
+        if (is_numeric($logo)) {
+            // It's an attachment ID, get the URL
+            $logo_url = wp_get_attachment_url($logo);
+            if ($logo_url) {
+                echo '<img id="tm_logo_preview" src="' . esc_url($logo_url) . '" style="max-width:150px; display:block; margin-bottom:10px;" alt="Logo preview" />';
+            }
+        } else {
+            // It's a URL
+            echo '<img id="tm_logo_preview" src="' . esc_url($logo) . '" style="max-width:150px; display:block; margin-bottom:10px;" alt="Logo preview" />';
+        }
+    }
+    
     echo '<button type="button" class="button" id="tm_logo_button">Select Logo</button><br><br>';
 
     echo '<label>Website URL:</label><br>';
@@ -52,7 +66,21 @@ function tm_advertiser_meta_box_callback($post) {
 
     echo '<label>Banner:</label><br>';
     echo '<input type="hidden" name="tm_banner" id="tm_banner" value="' . esc_attr($banner) . '" />';
-    echo '<img id="tm_banner_preview" src="' . esc_url($banner) . '" style="max-width:150px; display:block; margin-bottom:10px;" />';
+    
+    // Display banner preview (handle both attachment IDs and URLs)
+    if (!empty($banner)) {
+        if (is_numeric($banner)) {
+            // It's an attachment ID, get the URL
+            $banner_url = wp_get_attachment_url($banner);
+            if ($banner_url) {
+                echo '<img id="tm_banner_preview" src="' . esc_url($banner_url) . '" style="max-width:150px; display:block; margin-bottom:10px;" alt="Banner preview" />';
+            }
+        } else {
+            // It's a URL
+            echo '<img id="tm_banner_preview" src="' . esc_url($banner) . '" style="max-width:150px; display:block; margin-bottom:10px;" alt="Banner preview" />';
+        }
+    }
+    
     echo '<button type="button" class="button" id="tm_banner_button">Select Banner</button><br><br>';
 
     echo '<label>Restaurant:</label><br>';
@@ -102,7 +130,18 @@ function tm_advertiser_column_content($column, $post_id) {
     switch ($column) {
         case 'tm_logo':
             $logo = get_post_meta($post_id, '_tm_logo', true);
-            if ($logo) echo '<img src="' . esc_url($logo) . '" style="max-width:50px;" />';
+            if (!empty($logo)) {
+                if (is_numeric($logo)) {
+                    // It's an attachment ID, get the URL
+                    $logo_url = wp_get_attachment_url($logo);
+                    if ($logo_url) {
+                        echo '<img src="' . esc_url($logo_url) . '" style="max-width:50px; height:auto;" alt="Logo" />';
+                    }
+                } else {
+                    // It's a URL
+                    echo '<img src="' . esc_url($logo) . '" style="max-width:50px; height:auto;" alt="Logo" />';
+                }
+            }
             break;
         case 'tm_name':
             echo esc_html(get_post_meta($post_id, '_tm_name', true));
@@ -113,10 +152,24 @@ function tm_advertiser_column_content($column, $post_id) {
             break;
         case 'tm_banner':
             $banner = get_post_meta($post_id, '_tm_banner', true);
-            if ($banner) echo '<img src="' . esc_url($banner) . '" style="max-width:50px;" />';
+            if (!empty($banner)) {
+                if (is_numeric($banner)) {
+                    // It's an attachment ID, get the URL
+                    $banner_url = wp_get_attachment_url($banner);
+                    if ($banner_url) {
+                        echo '<img src="' . esc_url($banner_url) . '" style="max-width:50px; height:auto;" alt="Banner" />';
+                    }
+                } else {
+                    // It's a URL
+                    echo '<img src="' . esc_url($banner) . '" style="max-width:50px; height:auto;" alt="Banner" />';
+                }
+            }
             break;
         case 'tm_restaurant':
-            echo esc_html(get_post_meta($post_id, '_tm_restaurant', true));
+            $restaurant = get_post_meta($post_id, '_tm_restaurant', true);
+            if ($restaurant === 'yes' || $restaurant === '1' || $restaurant === true) {
+                echo 'Yes';
+            }
             break;
     }
 }

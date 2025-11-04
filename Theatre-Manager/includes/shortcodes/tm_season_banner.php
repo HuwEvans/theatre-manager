@@ -16,6 +16,12 @@ function tm_season_banner_shortcode($atts) {
     }
 
     $output .= '</div>';
+
+    $disable_border = get_option('tm_season_disable_border', false);
+    if ($disable_border) {
+        $output = str_replace(['border-width:', 'border-color:', 'border-style:'], '', $output);
+    }
+
     return $output;
 }
 add_shortcode('tm_season_banner', 'tm_season_banner_shortcode');
