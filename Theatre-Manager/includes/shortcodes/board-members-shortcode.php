@@ -113,15 +113,18 @@ function tm_board_member_shortcode($atts) {
         foreach ($query->posts as $post) {
             $company = get_post_meta($post->ID, '_tm_company', true);
             $position = get_post_meta($post->ID, '_tm_position', true);
-            $photo = get_post_meta($post->ID, '_tm_media_urls', true);
+            $photo = get_post_meta($post->ID, '_tm_photo', true);
 
             echo '<div class="tm-board-member-card" style="flex: 0 0 ' . $card_width . '; ' . esc_attr($style) . '">';
             
             if ($atts['show_photos'] === 'true' && $photo) {
-                echo '<img src="' . esc_url($photo) . '" alt="Photo" />';
+                $photo_url = tm_get_image_url($photo);
+                if ($photo_url) {
+                    echo '<img src="' . esc_url($photo_url) . '" alt="Photo" />';
+                }
             }
 
-            echo '<h4>' . esc_html(get_the_title($post)) . '</h4>';
+            echo '<h4>' . esc_html(get_the_title($post->ID)) . '</h4>';
 
             if ($position) {
                 echo '<div class="tm-position-bottom"><p><strong></strong> ' . esc_html($position) . '</p></div>';
