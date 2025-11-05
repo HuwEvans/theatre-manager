@@ -247,6 +247,7 @@ function tm_show_columns($columns) {
         'time_slot' => 'Time Slot',
         'season' => 'Season',
         'sm_image' => 'Image',
+        'program_pdf' => 'Program PDF',
 		'post_id' => 'ID'
     );
 }
@@ -270,6 +271,28 @@ function tm_show_custom_column($column, $post_id) {
         case 'sm_image':
             $img = get_post_meta($post_id, '_tm_show_sm_image', true);
             if ($img) echo '<img src="' . esc_url($img) . '" style="max-width:50px;" />';
+            break;
+        case 'program_pdf':
+            // Get program PDF attachment ID (stored in _tm_show_program)
+            $program_id = get_post_meta($post_id, '_tm_show_program', true);
+            if ($program_id) {
+                // Try to get generated thumbnail preview
+                $preview_url = get_post_meta($program_id, '_tm_pdf_preview', true);
+                if (!$preview_url) {
+                    // Fallback to attachment image
+                    $att_preview = wp_get_attachment_image_src($program_id, 'thumbnail');
+                    if ($att_preview) {
+                        $preview_url = $att_preview[0];
+                    }
+                }
+                if ($preview_url) {
+                    echo '<a href="' . esc_url(get_post_meta($post_id, '_tm_show_program_url', true)) . '" target="_blank">';
+                    echo '<img src="' . esc_url($preview_url) . '" style="max-width:50px; max-height:75px;" />';
+                    echo '</a>';
+                } else {
+                    echo '📄 PDF';
+                }
+            }
             break;
 		case 'post_id':
 			echo $post_id;

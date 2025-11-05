@@ -1,6 +1,37 @@
 <?php
 defined('ABSPATH') || exit;
 
+/**
+ * Get image URL from attachment ID or return the value if it's already a URL
+ * Handles both: direct URLs and WordPress attachment IDs
+ * 
+ * @param int|string $value Either an attachment ID or a URL
+ * @return string The image URL, or empty string if not found
+ */
+function tm_get_sponsor_image_url($value) {
+    if (empty($value)) {
+        return '';
+    }
+    
+    // If it's already a URL, return it
+    if (is_string($value) && (strpos($value, 'http') === 0 || strpos($value, '/') === 0)) {
+        return $value;
+    }
+    
+    // If it's an attachment ID, get the URL
+    if (is_numeric($value)) {
+        $attachment_id = intval($value);
+        if ($attachment_id > 0) {
+            $image_url = wp_get_attachment_url($attachment_id);
+            if ($image_url) {
+                return $image_url;
+            }
+        }
+    }
+    
+    return '';
+}
+
 function tm_register_sponsor_cpt() {
     $labels = array(
         'name' => 'Sponsors',
@@ -63,8 +94,11 @@ function tm_render_sponsor_meta_box($post) {
         <label for="tm_logo">Logo:</label><br>
         <input type="text" id="tm_logo" name="tm_logo" value="<?php echo esc_attr($logo); ?>" style="width:80%;" />
         <button type="button" class="button tm-media-upload" data-target="tm_logo">Select Logo</button><br>
-        <?php if ($logo): ?>
-            <img src="<?php echo esc_url($logo); ?>" alt="Logo Preview" style="max-width:150px; margin-top:10px;" />
+        <?php 
+        $logo_url = tm_get_sponsor_image_url($logo);
+        if ($logo_url): 
+        ?>
+            <img src="<?php echo esc_url($logo_url); ?>" alt="Logo Preview" style="max-width:150px; margin-top:10px;" />
         <?php endif; ?>
     </p>
 
@@ -72,8 +106,11 @@ function tm_render_sponsor_meta_box($post) {
         <label for="tm_banner">Banner:</label><br>
         <input type="text" id="tm_banner" name="tm_banner" value="<?php echo esc_attr($banner); ?>" style="width:80%;" />
         <button type="button" class="button tm-media-upload" data-target="tm_banner">Select Banner</button><br>
-        <?php if ($banner): ?>
-            <img src="<?php echo esc_url($banner); ?>" alt="Banner Preview" style="max-width:150px; margin-top:10px;" />
+        <?php 
+        $banner_url = tm_get_sponsor_image_url($banner);
+        if ($banner_url): 
+        ?>
+            <img src="<?php echo esc_url($banner_url); ?>" alt="Banner Preview" style="max-width:150px; margin-top:10px;" />
         <?php endif; ?>
     </p>
 
@@ -90,8 +127,23 @@ function tm_save_sponsor_meta($post_id) {
     update_post_meta($post_id, '_tm_name', sanitize_text_field($_POST['tm_name']));
     update_post_meta($post_id, '_tm_company', sanitize_text_field($_POST['tm_company']));
     update_post_meta($post_id, '_tm_level', sanitize_text_field($_POST['tm_level']));
-    update_post_meta($post_id, '_tm_logo', esc_url_raw($_POST['tm_logo']));
-    update_post_meta($post_id, '_tm_banner', esc_url_raw($_POST['tm_banner']));
+    
+    // Save logo - can be attachment ID or URL
+    $logo = sanitize_text_field($_POST['tm_logo']);
+    if (is_numeric($logo)) {
+        update_post_meta($post_id, '_tm_logo', intval($logo));
+    } else {
+        update_post_meta($post_id, '_tm_logo', esc_url_raw($logo));
+    }
+    
+    // Save banner - can be attachment ID or URL
+    $banner = sanitize_text_field($_POST['tm_banner']);
+    if (is_numeric($banner)) {
+        update_post_meta($post_id, '_tm_banner', intval($banner));
+    } else {
+        update_post_meta($post_id, '_tm_banner', esc_url_raw($banner));
+    }
+    
     update_post_meta($post_id, '_tm_website', esc_url_raw($_POST['tm_website']));
 
     remove_action('save_post', 'tm_save_sponsor_meta');
@@ -123,11 +175,13 @@ function tm_sponsor_custom_column($column, $post_id) {
             break;
         case 'logo':
             $logo = get_post_meta($post_id, '_tm_logo', true);
-            if ($logo) echo '<img src="' . esc_url($logo) . '" style="max-width:50px;" />';
+            $logo_url = tm_get_sponsor_image_url($logo);
+            if ($logo_url) echo '<img src="' . esc_url($logo_url) . '" style="max-width:50px;" />';
             break;
         case 'banner':
             $banner = get_post_meta($post_id, '_tm_banner', true);
-            if ($banner) echo '<img src="' . esc_url($banner) . '" style="max-width:50px;" />';
+            $banner_url = tm_get_sponsor_image_url($banner);
+            if ($banner_url) echo '<img src="' . esc_url($banner_url) . '" style="max-width:50px;" />';
             break;
         case 'website':
             $url = get_post_meta($post_id, '_tm_website', true);
