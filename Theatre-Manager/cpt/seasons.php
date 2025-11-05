@@ -1,4 +1,36 @@
 <?php
+
+/**
+ * Get image URL from attachment ID or return the value if it's already a URL
+ * Handles both: direct URLs and WordPress attachment IDs
+ * 
+ * @param int|string $value Either an attachment ID or a URL
+ * @return string The image URL, or empty string if not found
+ */
+function tm_get_season_image_url($value) {
+    if (empty($value)) {
+        return '';
+    }
+    
+    // If it's already a URL, return it
+    if (is_string($value) && (strpos($value, 'http') === 0 || strpos($value, '/') === 0)) {
+        return $value;
+    }
+    
+    // If it's an attachment ID, get the URL
+    if (is_numeric($value)) {
+        $attachment_id = intval($value);
+        if ($attachment_id > 0) {
+            $image_url = wp_get_attachment_url($attachment_id);
+            if ($image_url) {
+                return $image_url;
+            }
+        }
+    }
+    
+    return '';
+}
+
 function tm_register_season_cpt() {
     $labels = array(
         'name' => 'Seasons',
@@ -48,6 +80,13 @@ function tm_render_season_fields($post) {
     $is_current = get_post_meta($post->ID, '_tm_season_is_current', true);
     $is_upcoming = get_post_meta($post->ID, '_tm_season_is_upcoming', true);
 
+    // Convert attachment IDs to URLs for display
+    $image_front_url = tm_get_season_image_url($image_front);
+    $image_back_url = tm_get_season_image_url($image_back);
+    $social_banner_url = tm_get_season_image_url($social_banner);
+    $sm_square_url = tm_get_season_image_url($sm_square);
+    $sm_portrait_url = tm_get_season_image_url($sm_portrait);
+
     echo '<p><label>Name:<br><input type="text" name="tm_season_name" value="' . esc_attr($name) . '" class="widefat" /></label></p>';
     echo '<p><label>Start Date:<br><input type="date" name="tm_season_start_date" value="' . esc_attr($start_date) . '" class="widefat tm-datepicker" /></label></p>';
     echo '<p><label>End Date:<br><input type="date" name="tm_season_end_date" value="' . esc_attr($end_date) . '" class="widefat tm-datepicker" /></label></p>';
@@ -63,27 +102,27 @@ function tm_render_season_fields($post) {
 	echo '<label for="tm_season_image_front">3-up Front Image:</label>';
 	echo '<input type="text" name="tm_season_image_front" id="tm_season_image_front" value="' . esc_attr($image_front) . '" class="widefat" />';
 	echo '<button type="button" class="button tm-media-button" data-target="tm_season_image_front" data-preview="tm_season_image_front_preview">Select Image</button>';
-	echo '<div><img id="tm_season_image_front_preview" src="' . esc_url($image_front) . '" style="max-width:150px;' . ($image_front ? '' : ' display:none;') . '" /></div>';
+	echo '<div><img id="tm_season_image_front_preview" src="' . esc_url($image_front_url) . '" style="max-width:150px;' . ($image_front_url ? '' : ' display:none;') . '" /></div>';
 	
 	echo '<label for="tm_season_image_back">3-up Back Image:</label>';
 	echo '<input type="text" name="tm_season_image_back" id="tm_season_image_back" value="' . esc_attr($image_back) . '" class="widefat" />';
 	echo '<button type="button" class="button tm-media-button" data-target="tm_season_image_back" data-preview="tm_season_image_back_preview">Select Image</button>';
-	echo '<div><img id="tm_season_image_back_preview" src="' . esc_url($image_back) . '" style="max-width:150px;' . ($image_back ? '' : ' display:none;') . '" /></div>';
+	echo '<div><img id="tm_season_image_back_preview" src="' . esc_url($image_back_url) . '" style="max-width:150px;' . ($image_back_url ? '' : ' display:none;') . '" /></div>';
 	
 	echo '<label for="tm_season_social_banner">Website Banner:</label>';
 	echo '<input type="text" name="tm_season_social_banner" id="tm_season_social_banner" value="' . esc_attr($social_banner) . '" class="widefat" />';
 	echo '<button type="button" class="button tm-media-button" data-target="tm_season_social_banner" data-preview="tm_season_social_banner_preview">Select Image</button>';
-	echo '<div><img id="tm_season_social_banner_preview" src="' . esc_url($social_banner) . '" style="max-width:150px;' . ($social_banner ? '' : ' display:none;') . '" /></div>';
+	echo '<div><img id="tm_season_social_banner_preview" src="' . esc_url($social_banner_url) . '" style="max-width:150px;' . ($social_banner_url ? '' : ' display:none;') . '" /></div>';
 
 	echo '<label for="tm_season_sm_square">Social Media Square:</label>';
 	echo '<input type="text" name="tm_season_sm_square" id="tm_season_sm_square" value="' . esc_attr($sm_square) . '" class="widefat" />';
 	echo '<button type="button" class="button tm-media-button" data-target="tm_season_sm_square" data-preview="tm_season_sm_square_preview">Select Image</button>';
-	echo '<div><img id="tm_season_sm_square_preview" src="' . esc_url($sm_square) . '" style="max-width:150px;' . ($sm_square ? '' : ' display:none;') . '" /></div>';
+	echo '<div><img id="tm_season_sm_square_preview" src="' . esc_url($sm_square_url) . '" style="max-width:150px;' . ($sm_square_url ? '' : ' display:none;') . '" /></div>';
 
 	echo '<label for="tm_season_sm_portrait">Social Media Portrait:</label>';
 	echo '<input type="text" name="tm_season_sm_portrait" id="tm_season_sm_portrait" value="' . esc_attr($sm_portrait) . '" class="widefat" />';
 	echo '<button type="button" class="button tm-media-button" data-target="tm_season_sm_portrait" data-preview="tm_season_sm_portrait_preview">Select Image</button>';
-	echo '<div><img id="tm_season_sm_portrait_preview" src="' . esc_url($sm_portrait) . '" style="max-width:150px;' . ($sm_portrait ? '' : ' display:none;') . '" /></div>';
+	echo '<div><img id="tm_season_sm_portrait_preview" src="' . esc_url($sm_portrait_url) . '" style="max-width:150px;' . ($sm_portrait_url ? '' : ' display:none;') . '" /></div>';
 
 }
 
@@ -137,16 +176,19 @@ function tm_season_custom_column($column, $post_id) {
             echo esc_html(get_post_meta($post_id, '_tm_season_end_date', true));
             break;
         case 'image_front':
-            $img = get_post_meta($post_id, '_tm_season_image_front', true);
-            if ($img) echo '<img src="' . esc_url($img) . '" style="max-width:60px;">';
+            $img_value = get_post_meta($post_id, '_tm_season_image_front', true);
+            $img_url = tm_get_season_image_url($img_value);
+            if ($img_url) echo '<img src="' . esc_url($img_url) . '" style="max-width:60px;">';
             break;
         case 'image_back':
-            $img = get_post_meta($post_id, '_tm_season_image_back', true);
-            if ($img) echo '<img src="' . esc_url($img) . '" style="max-width:60px;">';
+            $img_value = get_post_meta($post_id, '_tm_season_image_back', true);
+            $img_url = tm_get_season_image_url($img_value);
+            if ($img_url) echo '<img src="' . esc_url($img_url) . '" style="max-width:60px;">';
             break;
         case 'social_banner':
-            $img = get_post_meta($post_id, '_tm_season_social_banner', true);
-            if ($img) echo '<img src="' . esc_url($img) . '" style="max-width:60px;">';
+            $img_value = get_post_meta($post_id, '_tm_season_social_banner', true);
+            $img_url = tm_get_season_image_url($img_value);
+            if ($img_url) echo '<img src="' . esc_url($img_url) . '" style="max-width:60px;">';
             break;
 		case 'post_id':
 			echo $post_id;		
