@@ -3,6 +3,37 @@
 defined('ABSPATH') || exit;
 
 /**
+ * Get image URL from attachment ID or return the value if it's already a URL
+ * Handles both: direct URLs and WordPress attachment IDs
+ * 
+ * @param int|string $value Either an attachment ID or a URL
+ * @return string The image URL, or empty string if not found
+ */
+function tm_get_show_image_url($value) {
+    if (empty($value)) {
+        return '';
+    }
+    
+    // If it's already a URL, return it
+    if (is_string($value) && (strpos($value, 'http') === 0 || strpos($value, '/') === 0)) {
+        return $value;
+    }
+    
+    // If it's an attachment ID, get the URL
+    if (is_numeric($value)) {
+        $attachment_id = intval($value);
+        if ($attachment_id > 0) {
+            $image_url = wp_get_attachment_url($attachment_id);
+            if ($image_url) {
+                return $image_url;
+            }
+        }
+    }
+    
+    return '';
+}
+
+/**
  * Register Show Custom Post Type
  */
 function tm_register_show_cpt() {
@@ -107,7 +138,9 @@ function tm_render_show_meta_box($post) {
 	echo '<input type="text" name="tm_show_sm_image" id="tm_show_sm_image" value="' . esc_attr($fields['sm_image']) . '" class="widefat" />';
     echo '<button type="button" class="button tm-media-button" data-target="tm_show_sm_image" data-preview="tm_show_sm_image_preview">Select Image</button>';
 	echo '</label></p>';
-	echo '<div><img id="tm_show_sm_image_preview" src="' . esc_url($fields['sm_image']) . '" style="max-width:150px;' . ($fields['sm_image'] ? '' : ' display:none;') . '" /></div>';
+	// Convert attachment ID to URL for preview display
+	$sm_image_url = tm_get_show_image_url($fields['sm_image']);
+	echo '<div><img id="tm_show_sm_image_preview" src="' . esc_url($sm_image_url) . '" style="max-width:150px;' . ($sm_image_url ? '' : ' display:none;') . '" /></div>';
 
     // Program PDF upload field (visible URL + hidden attachment ID)
     echo '<p><label>Program PDF:<br>';
