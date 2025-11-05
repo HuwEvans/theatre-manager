@@ -69,7 +69,10 @@ function tm_render_cast_meta_box($post) {
 	echo '<input type="text" name="tm_cast_picture" id="tm_cast_picture" value="' . esc_attr($fields['picture']) . '" class="widefat" />';
 	echo '<button type="button" class="button tm-media-button" data-target="tm_cast_picture" data-preview="tm_cast_picture_preview">Select Image</button>';
 	echo '</label></p>';
-	echo '<div><img id="tm_cast_picture_preview" src="' . esc_url($fields['picture']) . '" style="max-width:150px;' . ($fields['picture'] ? '' : ' display:none;') . '" /></div>';
+	
+	// Convert attachment ID to URL for display
+	$picture_url = function_exists('tm_get_image_url') ? tm_get_image_url($fields['picture']) : $fields['picture'];
+	echo '<div><img id="tm_cast_picture_preview" src="' . esc_url($picture_url) . '" style="max-width:150px;' . ($picture_url ? '' : ' display:none;') . '" /></div>';
 
     echo '<p><label>Show:<br><select name="tm_cast_show">';
     foreach ($shows as $show) {
@@ -124,7 +127,11 @@ function tm_cast_custom_column($column, $post_id) {
             break;
         case 'picture':
             $img = get_post_meta($post_id, '_tm_cast_picture', true);
-            if ($img) echo '<img src="' . esc_url($img) . '" style="max-width:50px;" />';
+            if ($img) {
+                // Convert attachment ID to URL for display
+                $picture_url = function_exists('tm_get_image_url') ? tm_get_image_url($img) : $img;
+                echo '<img src="' . esc_url($picture_url) . '" style="max-width:50px;" />';
+            }
             break;
         case 'show':
             $show_id = get_post_meta($post_id, '_tm_cast_show', true);
