@@ -1,5 +1,10 @@
 # Theatre Manager - Changelog
 
+## [3.7.13] - 2026-06-08
+
+### Fixed
+- **Block Alignment Inheritance**: Button now respects the alignment of its parent Gutenberg block, Beaver Builder block, or any container. Changed `.tm-landingpage-wrapper` to use `text-align: inherit` instead of hardcoded center, allowing buttons to align left, center, or right based on the block's alignment setting.
+
 ## [3.7.12] - 2026-06-08
 
 ### Fixed

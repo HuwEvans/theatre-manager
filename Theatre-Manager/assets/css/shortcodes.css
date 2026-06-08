@@ -867,11 +867,12 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-/* Landing Page Wrapper and Field Styles - Center Alignment by Default */
+/* Landing Page Wrapper and Field Styles - Inherit Block Alignment */
 .tm-landingpage-wrapper,
 .tm-landingpage-wrapper.tm-landingpage,
 .tm-landingpage-field {
-    text-align: center;
+    /* Inherit alignment from parent Gutenberg block, Beaver Builder block, or container */
+    text-align: inherit;
 }
 
 /* Responsive button adjustments */

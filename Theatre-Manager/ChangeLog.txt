@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 3.7.13
+Block alignment inheritance for buttons.
+- Changed .tm-landingpage-wrapper from text-align: center to text-align: inherit
+- Buttons now respect parent Gutenberg block, Beaver Builder block, or container alignment
+- Works with center, left, and right alignment settings
+- Version updated to 3.7.13
+
 ## Version 3.7.12
 Button alignment fix - ensures Get Tickets button centers with page content.
 - Fixed button centering by explicitly setting .tm-landingpage-wrapper text-align to center
