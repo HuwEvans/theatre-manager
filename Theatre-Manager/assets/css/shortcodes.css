@@ -867,12 +867,37 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-/* Landing Page Wrapper and Field Styles - Inherit Block Alignment */
+/* Landing Page Wrapper - Match surrounding Gutenberg block alignment */
 .tm-landingpage-wrapper,
 .tm-landingpage-wrapper.tm-landingpage,
 .tm-landingpage-field {
-    /* Inherit alignment from parent Gutenberg block, Beaver Builder block, or container */
-    text-align: inherit;
+    /* Default to left alignment, but CSS selectors below will override */
+    text-align: left;
+}
+
+/* Match center alignment when following centered Gutenberg blocks */
+.has-text-align-center + .tm-landingpage-wrapper,
+.has-text-align-center + hr + .tm-landingpage-wrapper,
+.has-text-align-center + hr + hr + .tm-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-center + .tm-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-center + hr + .tm-landingpage-wrapper {
+    text-align: center;
+}
+
+/* Match left alignment when following left-aligned blocks */
+.has-text-align-left + .tm-landingpage-wrapper,
+.has-text-align-left + hr + .tm-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-left + .tm-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-left + hr + .tm-landingpage-wrapper {
+    text-align: left;
+}
+
+/* Match right alignment when following right-aligned blocks */
+.has-text-align-right + .tm-landingpage-wrapper,
+.has-text-align-right + hr + .tm-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-right + .tm-landingpage-wrapper,
+.wp-block-paragraph.has-text-align-right + hr + .tm-landingpage-wrapper {
+    text-align: right;
 }
 
 /* Responsive button adjustments */

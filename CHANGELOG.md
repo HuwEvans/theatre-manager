@@ -1,5 +1,10 @@
 # Theatre Manager - Changelog
 
+## [3.7.14] - 2026-06-08
+
+### Fixed
+- **Gutenberg Block Alignment Detection**: Button now automatically detects and matches the alignment of preceding Gutenberg blocks. Uses CSS sibling selectors to detect `has-text-align-center`, `has-text-align-left`, and `has-text-align-right` classes on surrounding content and applies matching alignment to the button and shortcode wrapper.
+
 ## [3.7.13] - 2026-06-08
 
 ### Fixed
