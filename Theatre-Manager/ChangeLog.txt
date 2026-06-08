@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 3.7.15
+Critical bug fix for cast grid layout.
+- Fixed critical issue where castwithbio field displayed only one column with very large images
+- CSS rule was using display: flex which overrode the grid layout
+- Restored proper display: grid with grid-template-columns using --cast-cols CSS variable
+- Cast grid now properly displays multiple columns respecting the castcols parameter
+
 ## Version 3.7.14
 Comprehensive fixes: custom post type capabilities, responsive image scaling, castcols honoring, and field alignment inheritance.
 - Fixed custom post type capability issue preventing users from editing posts

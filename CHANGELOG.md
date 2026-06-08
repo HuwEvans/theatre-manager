@@ -1,5 +1,10 @@
 # Theatre Manager - Changelog
 
+## [3.7.15] - 2026-06-08
+
+### Fixed
+- **Critical Cast Grid Layout Bug**: Fixed issue where castwithbio field was displaying only one column with very large images. The CSS rule at line 974 was using `display: flex` which was overriding the grid layout. Restored proper `display: grid` with `grid-template-columns: repeat(var(--cast-cols, 3), 1fr)` to respect the castcols parameter and display multiple columns correctly.
+
 ## [3.7.14] - 2026-06-08
 
 ### Fixed
