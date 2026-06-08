@@ -536,3 +536,353 @@
         height: auto;
     }
 }
+
+/* Landing Page Shortcode Styles */
+.tm-landingpage-wrapper,
+.tm-landingpage {
+    /* Inherit alignment from parent container */
+    text-align: inherit;
+    width: 100%;
+}
+
+/* Image-only shortcodes with hard_breaks=false - stays inline with text */
+.tm-landingpage-image-inline {
+    display: inline-block;
+    text-align: center;
+}
+
+.tm-landingpage-image-inline img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* Mixed content container - centers both text and images */
+.tm-landingpage-mixed {
+    text-align: center;
+    width: 100%;
+}
+
+.tm-landingpage-mixed img {
+    /* Images in mixed content display as block and center */
+    display: block;
+    margin: 10px auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.tm-landingpage-field {
+    /* Inherit alignment from parent */
+    text-align: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+/* Images in landing page wrapper when hard_breaks=true */
+.tm-landingpage-wrapper > img,
+.tm-landingpage-field img {
+    /* Center images but maintain parent text alignment for text */
+    display: block;
+    margin: 10px auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.tm-landingpage-field br {
+    display: none;
+}
+
+/* Cast with Bio - Responsive Grid Layout */
+.tm-landingpage-castwithbio {
+    display: grid;
+    grid-template-columns: repeat(var(--cast-cols, 3), 1fr);
+    gap: 25px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.tm-cast-column {
+    display: flex;
+    flex-direction: column;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tm-cast-column:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tm-cast-image {
+    display: block;
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.tm-cast-character {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 8px 0 4px 0;
+    color: #333;
+}
+
+.tm-cast-actor {
+    font-size: 0.9em;
+    font-style: italic;
+    color: #666;
+    margin: 4px 0 10px 0;
+}
+
+.tm-cast-bio {
+    font-size: 0.85em;
+    line-height: 1.5;
+    color: #555;
+    margin: 0;
+    flex-grow: 1;
+}
+
+/* Responsive breakpoints for smaller screens */
+@media (max-width: 1024px) {
+    .tm-landingpage-castwithbio {
+        grid-template-columns: repeat(min(var(--cast-cols, 3), 2), 1fr);
+        gap: 20px;
+    }
+    
+    .tm-cast-column {
+        padding: 12px;
+    }
+    
+    .tm-cast-image {
+        height: 160px;
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .tm-landingpage-castwithbio {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .tm-cast-column {
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 12px;
+        align-items: start;
+    }
+    
+    .tm-cast-image {
+        height: 140px;
+        margin-bottom: 0;
+        grid-row: 1 / 5;
+    }
+    
+    .tm-cast-character {
+        grid-column: 2;
+        margin: 0 0 4px 0;
+    }
+    
+    .tm-cast-actor {
+        grid-column: 2;
+        margin: 0 0 8px 0;
+    }
+    
+    .tm-cast-bio {
+        grid-column: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .tm-landingpage-castwithbio {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .tm-cast-column {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .tm-cast-image {
+        height: 150px;
+        margin-bottom: 8px;
+    }
+}
+
+/* URL Button Styles */
+.tm-url-button {
+    display: inline-block;
+    padding: 12px 24px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Default Button Format */
+.tm-button-default {
+    background-color: #0073aa;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+.tm-button-default:hover {
+    background-color: #005a87;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tm-button-default:active {
+    transform: translateY(0);
+}
+
+/* Modern Rounded Button Format */
+.tm-button-modern {
+    background-color: #2c3e50;
+    color: #ffffff;
+    border-radius: 25px;
+    padding: 12px 32px;
+}
+
+.tm-button-modern:hover {
+    background-color: #1a252f;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+.tm-button-modern:active {
+    transform: scale(0.98);
+}
+
+/* Minimal Border Button */
+.tm-button-minimal {
+    background-color: transparent;
+    color: #0073aa;
+    border: 2px solid #0073aa;
+    border-radius: 4px;
+    padding: 10px 22px;
+}
+
+.tm-button-minimal:hover {
+    background-color: #0073aa;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 115, 170, 0.3);
+}
+
+/* Outline Button */
+.tm-button-outline {
+    background-color: transparent;
+    color: #333333;
+    border: 2px solid #333333;
+    border-radius: 6px;
+}
+
+.tm-button-outline:hover {
+    background-color: #333333;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Gradient Button */
+.tm-button-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    border-radius: 8px;
+}
+
+.tm-button-gradient:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Prominent/Call-to-Action Button */
+.tm-button-prominent {
+    background-color: #e74c3c;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 14px 28px;
+    font-size: 1.1em;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.tm-button-prominent:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(231, 76, 60, 0.3);
+}
+
+/* Success/Green Button */
+.tm-button-success {
+    background-color: #27ae60;
+    color: #ffffff;
+    border-radius: 6px;
+}
+
+.tm-button-success:hover {
+    background-color: #229954;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+/* Ghost Button with hover underline */
+.tm-button-ghost {
+    background-color: transparent;
+    color: #0073aa;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    padding: 8px 12px;
+    transition: border-color 0.3s ease;
+}
+
+.tm-button-ghost:hover {
+    border-bottom-color: #0073aa;
+}
+
+/* Glass/Frosted effect button */
+.tm-button-glass {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.tm-button-glass:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Landing Page Wrapper and Field Styles - Center Alignment by Default */
+.tm-landingpage-wrapper,
+.tm-landingpage-wrapper.tm-landingpage,
+.tm-landingpage-field {
+    text-align: center;
+}
+
+/* Responsive button adjustments */
+@media (max-width: 768px) {
+    .tm-url-button {
+        padding: 10px 20px;
+        font-size: 0.95em;
+    }
+    
+    .tm-button-prominent {
+        padding: 12px 24px;
+        font-size: 1em;
+    }
+}
