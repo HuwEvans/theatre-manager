@@ -64,7 +64,7 @@ function tm_get_current_show() {
 /**
  * Render field output based on field name
  */
-function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true) {
+function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true, $atts = array()) {
     $output = '';
     
     switch ($field_name) {
@@ -155,11 +155,20 @@ function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true)
         case 'ticket_url':
             $url = get_post_meta($show_id, '_tm_show_tickets_url', true);
             if ($url) {
-                if ($hard_breaks) {
-                    $output .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($url) . '</a>';
+                $use_button = strtolower($atts['urlbutton']) === 'true' || $atts['urlbutton'] === '1';
+                if ($use_button && $hard_breaks) {
+                    // Display as a button
+                    $buttonformat = sanitize_key($atts['buttonformat']);
+                    $button_class = 'tm-url-button tm-button-' . esc_attr($buttonformat);
+                    $output .= '<a href="' . esc_url($url) . '" class="' . $button_class . '" target="_blank">Get Tickets</a>';
                 } else {
-                    // Just the URL text when hard_breaks is false
-                    $output .= esc_html($url);
+                    // Display as regular link
+                    if ($hard_breaks) {
+                        $output .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($url) . '</a>';
+                    } else {
+                        // Just the URL text when hard_breaks is false
+                        $output .= esc_html($url);
+                    }
                 }
             }
             break;
@@ -348,7 +357,9 @@ function tm_shortcode_landingpage($atts) {
         'show_id' => 'current',
         'field_list' => 'show_name,show_image,author,director,producer,stage_manager,synopsis,show_dates,ticket_url,cast,venue',
         'hard_breaks' => 'true',
-        'castcols' => '3'
+        'castcols' => '3',
+        'urlbutton' => 'false',
+        'buttonformat' => 'default'
     ], $atts, 'tm_landingpage');
 
     // Determine which show to display
@@ -388,7 +399,7 @@ function tm_shortcode_landingpage($atts) {
 
         foreach ($field_list as $field) {
             $field = sanitize_key($field);
-            $field_output = tm_render_landingpage_field($show_id, $field, $hard_breaks);
+            $field_output = tm_render_landingpage_field($show_id, $field, $hard_breaks, $atts);
 
             if ($field_output) {
                 // Images don't need field div wrapper - they're self-contained
@@ -409,7 +420,7 @@ function tm_shortcode_landingpage($atts) {
         
         foreach ($field_list as $field) {
             $field = sanitize_key($field);
-            $field_output = tm_render_landingpage_field($show_id, $field, $hard_breaks);
+            $field_output = tm_render_landingpage_field($show_id, $field, $hard_breaks, $atts);
 
             if ($field_output) {
                 // Track image output separately

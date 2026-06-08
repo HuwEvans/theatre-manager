@@ -47,7 +47,7 @@ function tm_register_show_cpt() {
         'new_item' => 'New Show',
         'edit_item' => 'Edit Show',
         'view_item' => 'View Show',
-        'all_items' => 'All Shows',
+        'all_items' => 'Shows',
         'search_items' => 'Search Shows',
         'not_found' => 'No shows found.',
     );
@@ -59,7 +59,7 @@ function tm_register_show_cpt() {
         'menu_icon' => 'dashicons-tickets-alt',
         'supports' => array(''),
         'has_archive' => true,
-        'show_in_menu' => 'theatre-manager',
+        'show_in_menu' => get_option('tm_show_builder_cpt_menus', '1') ? 'theatre-manager' : false,
     );
 
     register_post_type('show', $args);
@@ -85,12 +85,17 @@ function tm_render_show_meta_box($post) {
         'author' => '',
         'sub_authors' => '',
         'synopsis' => '',
+        'audition_date' => '',
         'genre' => '',
         'director' => '',
         'associate_director' => '',
+        'producer' => '',
+        'stage_manager' => '',
         'time_slot' => '',
         'show_dates' => '',
         'season' => '',
+        'venue' => '',
+        'tickets_url' => '',
         'sm_image' => ''
     ];
 
@@ -105,11 +110,25 @@ function tm_render_show_meta_box($post) {
     $genres = ['Comedy', 'Farce', 'Mystery', 'Drama', 'Musical'];
     $slots = ['Fall', 'Winter', 'Spring'];
     $seasons = get_posts(['post_type' => 'season', 'numberposts' => -1]);
+    $venues = get_posts(['post_type' => 'venue', 'numberposts' => -1]);
 
     echo '<p><label>Name:<br><input type="text" name="tm_show_name" value="' . esc_attr($fields['name']) . '" class="widefat" /></label></p>';
     echo '<p><label>Author:<br><input type="text" name="tm_show_author" value="' . esc_attr($fields['author']) . '" class="widefat" /></label></p>';
     echo '<p><label>Sub-authors:<br><input type="text" name="tm_show_sub_authors" value="' . esc_attr($fields['sub_authors']) . '" class="widefat" /></label></p>';
     echo '<p><label>Synopsis:<br><textarea name="tm_show_synopsis" class="widefat">' . esc_textarea($fields['synopsis']) . '</textarea></label></p>';
+    echo '<p><label>Audition Date:<br><input type="date" name="tm_show_audition_date" value="' . esc_attr($fields['audition_date']) . '" class="widefat tm-datepicker" /></label></p>';
+
+    echo '<p><label>Audition Details:</label></p>';
+    wp_editor(
+        get_post_meta($post->ID, '_tm_show_audition_details', true),
+        'tm_show_audition_details',
+        array(
+            'textarea_name' => 'tm_show_audition_details',
+            'textarea_rows' => 6,
+            'media_buttons' => false,
+            'teeny' => true,
+        )
+    );
 
     echo '<p><label>Genre:<br><select name="tm_show_genre">';
     foreach ($genres as $genre) {
@@ -119,6 +138,8 @@ function tm_render_show_meta_box($post) {
 
     echo '<p><label>Director:<br><input type="text" name="tm_show_director" value="' . esc_attr($fields['director']) . '" class="widefat" /></label></p>';
     echo '<p><label>Associate Director:<br><input type="text" name="tm_show_associate_director" value="' . esc_attr($fields['associate_director']) . '" class="widefat" /></label></p>';
+    echo '<p><label>Producer:<br><input type="text" name="tm_show_producer" value="' . esc_attr($fields['producer']) . '" class="widefat" /></label></p>';
+    echo '<p><label>Stage Manager:<br><input type="text" name="tm_show_stage_manager" value="' . esc_attr($fields['stage_manager']) . '" class="widefat" /></label></p>';
 
     echo '<p><label>Time Slot:<br><select name="tm_show_time_slot">';
     foreach ($slots as $slot) {
@@ -133,6 +154,15 @@ function tm_render_show_meta_box($post) {
         echo '<option value="' . esc_attr($season->ID) . '" ' . selected($fields['season'], $season->ID, false) . '>' . esc_html($season->post_title) . '</option>';
     }
     echo '</select></label></p>';
+
+    echo '<p><label>Venue:<br><select name="tm_show_venue">';
+    echo '<option value="">-- Select Venue --</option>';
+    foreach ($venues as $venue) {
+        echo '<option value="' . esc_attr($venue->ID) . '" ' . selected($fields['venue'], $venue->ID, false) . '>' . esc_html($venue->post_title) . '</option>';
+    }
+    echo '</select></label></p>';
+
+    echo '<p><label>Tickets URL:<br><input type="url" name="tm_show_tickets_url" value="' . esc_attr($fields['tickets_url']) . '" class="widefat" placeholder="https://example.com/tickets" /></label></p>';
 
 	echo '<p><label>SM Image:<br>';
 	echo '<input type="text" name="tm_show_sm_image" id="tm_show_sm_image" value="' . esc_attr($fields['sm_image']) . '" class="widefat" />';
@@ -196,9 +226,9 @@ function tm_save_show_meta($post_id) {
     if ('show' !== $_POST['post_type'] || !current_user_can('edit_post', $post_id)) return;
 
     $fields = [
-        'name', 'author', 'sub_authors', 'synopsis',
-        'genre', 'director', 'associate_director',
-        'time_slot', 'show_dates', 'season', 'sm_image'
+        'name', 'author', 'sub_authors', 'synopsis', 'audition_date',
+        'genre', 'director', 'associate_director', 'producer', 'stage_manager',
+        'time_slot', 'show_dates', 'season', 'venue', 'tickets_url', 'sm_image'
     ];
 
     foreach ($fields as $field) {
@@ -206,6 +236,8 @@ function tm_save_show_meta($post_id) {
             update_post_meta($post_id, '_tm_show_' . $field, sanitize_text_field($_POST['tm_show_' . $field]));
         }
     }
+
+    update_post_meta($post_id, '_tm_show_audition_details', wp_kses_post($_POST['tm_show_audition_details'] ?? ''));
 
     // Program saving: prefer explicit attachment ID if provided, otherwise resolve URL
     if (isset($_POST['tm_show_program_id']) && is_numeric($_POST['tm_show_program_id'])) {

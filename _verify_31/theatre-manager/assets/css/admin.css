@@ -1,0 +1,79 @@
+/* Theatre Manager Admin Styles */
+
+.tm-board-member label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.tm-board-member input[type="text"],
+.tm-board-member input[type="url"],
+.tm-board-member input[type="date"] {
+    width: 100%;
+    padding: 6px 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#tm_picture_preview {
+    display: block;
+    margin-top: 10px;
+    max-width: 150px;
+    height: auto;
+    border: 1px solid #ccc;
+    padding: 4px;
+    background: #f9f9f9;
+}
+
+#tm_picture_button {
+    margin-top: 10px;
+}
+
+/* Seasons CPT Admin Styles */
+.tm-season label,
+.tm-season input,
+.tm-season select,
+.tm-season textarea {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+}
+#tm_season_image_front_preview,
+#tm_season_image_back_preview,
+#tm_season_social_banner_preview {
+    max-width: 150px;
+    display: block;
+    margin-top: 5px;
+}
+
+/* Shows CPT Admin Styles */
+.tm-show label,
+.tm-show input,
+.tm-show select,
+.tm-show textarea {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+}
+#tm_show_sm_image_preview {
+    max-width: 150px;
+    display: block;
+    margin-top: 5px;
+}
+
+/* Cast CPT Admin Styles */
+.tm-cast label,
+.tm-cast input,
+.tm-cast select,
+.tm-cast textarea {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+}
+#tm_cast_picture_preview {
+    max-width: 150px;
+    display: block;
+    margin-top: 5px;
+}

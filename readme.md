@@ -1,4 +1,21 @@
 # Theatre Manager Wordpress Plugin
+
+## Packaging Command
+
+From the repository root, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\package.ps1
+```
+
+This creates a versioned zip file using the plugin header version, for example `Theatre-Manager-3.1.zip`.
+Inside the zip, the plugin is packaged under the standard lowercase folder name `theatre-manager` for WordPress compatibility.
+You can override the version explicitly:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\package.ps1 -Version 2.8
+```
+
 This plugin is designed to work with Wordpress and wsa developed to help theatre groups manage important objects
 on their websites.  It was designed after serveral years of maintaining a website for this purpose, and combines
 simpliying the management of common changes that are required, and making it simple for non-technical people to 

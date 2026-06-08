@@ -16,7 +16,7 @@ function tm_register_cast_cpt() {
         'new_item' => 'New Cast Member',
         'edit_item' => 'Edit Cast Member',
         'view_item' => 'View Cast Member',
-        'all_items' => 'All Cast Members',
+        'all_items' => 'Cast Members',
         'search_items' => 'Search Cast',
         'not_found' => 'No cast members found.',
     );
@@ -28,7 +28,7 @@ function tm_register_cast_cpt() {
         'menu_icon' => 'dashicons-groups',
         'supports' => array(''),
         'has_archive' => true,
-        'show_in_menu' => 'theatre-manager',
+        'show_in_menu' => get_option('tm_show_builder_cpt_menus', '1') ? 'theatre-manager' : false,
     );
 
     register_post_type('cast', $args);
@@ -53,7 +53,8 @@ function tm_render_cast_meta_box($post) {
         'character_name' => '',
         'actor_name' => '',
         'picture' => '',
-        'show' => ''
+        'show' => '',
+        'bio' => ''
     ];
 
     foreach ($fields as $key => $default) {
@@ -74,6 +75,8 @@ function tm_render_cast_meta_box($post) {
 	$picture_url = function_exists('tm_get_image_url') ? tm_get_image_url($fields['picture']) : $fields['picture'];
 	echo '<div><img id="tm_cast_picture_preview" src="' . esc_url($picture_url) . '" style="max-width:150px;' . ($picture_url ? '' : ' display:none;') . '" /></div>';
 
+    echo '<p><label>Bio:<br><textarea name="tm_cast_bio" class="widefat" rows="4">' . esc_textarea($fields['bio']) . '</textarea></label></p>';
+
     echo '<p><label>Show:<br><select name="tm_cast_show">';
     foreach ($shows as $show) {
         echo '<option value="' . esc_attr($show->ID) . '" ' . selected($fields['show'], $show->ID, false) . '>' . esc_html($show->post_title) . '</option>';
@@ -89,7 +92,7 @@ function tm_save_cast_meta($post_id) {
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
     if ('cast' !== $_POST['post_type'] || !current_user_can('edit_post', $post_id)) return;
 
-    $fields = ['character_name', 'actor_name', 'picture', 'show'];
+    $fields = ['character_name', 'actor_name', 'picture', 'show', 'bio'];
 
     foreach ($fields as $field) {
         if (isset($_POST['tm_cast_' . $field])) {

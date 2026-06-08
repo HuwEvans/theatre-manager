@@ -1,0 +1,41 @@
+
+.tm-cast-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.tm-cast-list th,
+.tm-cast-list td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+	width: 33%;
+}
+
+.tm-cast-list th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.tm-cast-list img.tm-cast-thumbnail {
+    max-width: 60px;
+    height: auto;
+    border-radius: 4px;
+}
+
+@media screen and (max-width: 768px) {
+    .tm-cast-list th,
+    .tm-cast-list td {
+        padding: 8px;
+    }
+
+    .tm-cast-list img.tm-cast-thumbnail {
+        max-width: 40px;
+    }
+}
+
+.tm-cast-table {
+	width: 100%;
+}

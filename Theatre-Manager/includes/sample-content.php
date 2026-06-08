@@ -8,170 +8,141 @@ if (!defined('ABSPATH')) {
 }
 
 /**
+ * Delete all sample pages and menu items
+ */
+function tm_delete_sample_pages() {
+    // Get the parent page
+    $parent_page = get_page_by_path('theatre-manager', OBJECT, 'page');
+    $parent_page_id = $parent_page ? $parent_page->ID : 0;
+    
+    $sample_page_slugs = array(
+        'tm-shows', 'tm-current-season', 'tm-cast-members', 'tm-board-members',
+        'tm-sponsors', 'tm-advertisers', 'tm-contributors', 'tm-seasons',
+        'tm-programs', 'tm-testimonials', 'tm-season-cast', 'tm-show-cast',
+        'tm-season-images', 'tm-season-shows', 'tm-auditions', 'tm-awards', 'tm-venues', 'tm-tickets'
+    );
+    
+    // Delete individual sample pages by slug
+    foreach ($sample_page_slugs as $slug) {
+        $page = get_page_by_path($slug, OBJECT, 'page');
+        if ($page) {
+            wp_delete_post($page->ID, true); // Force delete (skip trash)
+        }
+    }
+    
+    // Delete parent page last (this may also delete children, but we ensure all are deleted above)
+    if ($parent_page_id > 0) {
+        wp_delete_post($parent_page_id, true); // Force delete (skip trash)
+    }
+    
+    // Remove menu items for theatre manager pages
+    $menu_name = 'primary';
+    $locations = get_nav_menu_locations();
+    
+    if (isset($locations[$menu_name])) {
+        $menu = wp_get_nav_menu_object($locations[$menu_name]);
+        if ($menu) {
+            $menu_items = wp_get_nav_menu_items($menu->term_id);
+            if ($menu_items) {
+                foreach ($menu_items as $item) {
+                    // Delete items that link to our theatre manager pages
+                    if ($item->object === 'page' && ($item->object_id == $parent_page_id || in_array($item->object_id, wp_list_pluck(get_pages(array('post_name__in' => $sample_page_slugs)), 'ID')))) {
+                        wp_delete_post($item->ID, true); // Menu items are posts of type nav_menu_item
+                    }
+                }
+            }
+        }
+    }
+    
+    return true;
+}
+
+/**
  * Create sample pages for each CPT with appropriate shortcodes
  */
 function tm_create_sample_pages() {
-    // Try to pick sensible real IDs where possible so generated sample pages work out of the box.
-    $first_show = get_posts(array('post_type' => 'show', 'numberposts' => 1));
-    $first_show_id = !empty($first_show) ? intval($first_show[0]->ID) : 0;
-    $first_season = get_posts(array('post_type' => 'season', 'numberposts' => 1));
-    $first_season_id = !empty($first_season) ? intval($first_season[0]->ID) : 0;
     $sample_pages = array(
         'TM_Shows' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Our upcoming and past theatre productions.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_shows]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Our Upcoming and Past Theatre Productions</h2><p>Browse all shows from our current and upcoming seasons.</p>' . "\n\n" . '[tm_shows]',
             'template' => 'default'
         ),
         'TM_Current_Season' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Welcome to our current season!</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_season_banner season_id="current"]
-<!-- /wp:shortcode -->
-
-<!-- wp:shortcode -->
-[tm_season_shows season_id="current"]
-<!-- /wp:shortcode -->
-
-<!-- wp:shortcode -->
-[tm_season_cast season_id="current"]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Current Season</h2><p>Welcome to our current season! Here you can find shows, cast, and season information.</p>' . "\n\n" . '[tm_season_banner]' . "\n" . '[tm_season_shows which="current"]' . "\n" . '[tm_season_cast which="current"]',
             'template' => 'default'
         ),
         'TM_Cast_Members' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Meet our talented cast members.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_cast]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Meet Our Talented Cast Members</h2><p>View cast members from all our productions.</p>' . "\n\n" . '[tm_cast]',
             'template' => 'default'
         ),
         'TM_Board_Members' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Meet our dedicated board members.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_board_members]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Meet Our Dedicated Board Members</h2><p>The Board of Directors that make our productions possible.</p>' . "\n\n" . '[tm_board_members]',
             'template' => 'default'
         ),
         'TM_Sponsors' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Thank you to our generous sponsors!</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_sponsors]
-<!-- /wp:shortcode -->
-
-<!-- wp:heading {"level":3} -->
-<h3>Featured Sponsors</h3>
-<!-- /wp:heading -->
-
-<!-- wp:shortcode -->
-[tm_sponsor_slider]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Theatre Sponsors</h2><p>We are grateful for the generous support of our sponsors!</p>' . "\n\n" . '[tm_sponsors]' . "\n\n" . '<h3>Featured Sponsors</h3>' . "\n" . '[tm_sponsor_slider]',
             'template' => 'default'
         ),
         'TM_Advertisers' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Support our advertisers who help make our productions possible.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_advertisers]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Local Businesses & Advertisers</h2><p>Support our advertisers who help make our productions possible.</p>' . "\n\n" . '[tm_advertisers]',
             'template' => 'default'
         ),
         'TM_Contributors' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Thank you to all our contributors and donors.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_contributors]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Contributors & Donors</h2><p>Thank you to all our contributors and donors.</p>' . "\n\n" . '[tm_contributors]',
             'template' => 'default'
         ),
         'TM_Seasons' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Browse our seasons.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_seasons count="6" layout="grid"]
-<!-- /wp:shortcode -->',
-            'template' => 'default'
-        ),
-        'TM_Cast_Grouped' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Cast grouped by show name.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_cast group_by="show"]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Theatre Seasons</h2><p>Browse all our theatre seasons.</p>' . "\n\n" . '[tm_seasons]',
             'template' => 'default'
         ),
         'TM_Programs' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>View our show programs and playbills.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_programs]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Show Programs</h2><p>View and download our show programs and playbills.</p>' . "\n\n" . '[tm_programs]',
             'template' => 'default'
         ),
         'TM_Testimonials' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>What people are saying about our productions.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_testimonials]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>What Patrons Are Saying</h2><p>Read testimonials from our wonderful theatre patrons.</p>' . "\n\n" . '[tm_testimonials]',
+            'template' => 'default'
+        ),
+        'TM_Season_Cast' => array(
+            'content' => '<h2>Cast by Season</h2><p>View cast members organized by season.</p>' . "\n\n" . '[tm_season_cast which="all"]',
             'template' => 'default'
         ),
         'TM_Show_Cast' => array(
-            'content' => '<!-- wp:paragraph -->\n<p>Cast for a single show (uses first available Show ID' . ($first_show_id ? '' : ' — placeholder shown because no Show exists') . ').</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:shortcode -->\n' . '[tm_show_cast show_id="' . ($first_show_id ? $first_show_id : '123') . '"]' . '\n<!-- /wp:shortcode -->',
+            'content' => '<h2>Cast for a Show</h2><p>To display cast for a specific show, edit this page and replace show_id with the actual show ID.</p>' . "\n\n" . '[tm_show_cast show_id="1"]',
             'template' => 'default'
         ),
         'TM_Season_Images' => array(
-            'content' => '<!-- wp:paragraph -->\n<p>Image gallery for a season (uses first available Season ID' . ($first_season_id ? '' : ' — placeholder shown because no Season exists') . ').</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:shortcode -->\n' . '[tm_season_images season_id="' . ($first_season_id ? $first_season_id : '456') . '" layout="grid"]' . '\n<!-- /wp:shortcode -->',
+            'content' => '<h2>Season Images</h2><p>To display images for a specific season, edit this page and replace season_id with the actual season ID.</p>' . "\n\n" . '[tm_season_images season_id="1"]',
             'template' => 'default'
         ),
         'TM_Season_Shows' => array(
-            'content' => '<!-- wp:paragraph -->
-<p>Shows for current and next seasons.</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:shortcode -->
-[tm_season_shows which="current_and_next" layout="grid"]
-<!-- /wp:shortcode -->',
+            'content' => '<h2>Shows by Season</h2><p>View shows organized by current, upcoming, and past seasons.</p>' . "\n\n" . '[tm_season_shows which="current_and_next"]',
+            'template' => 'default'
+        ),
+        'TM_Auditions' => array(
+            'content' => '<h2>Upcoming Auditions</h2><p>Check out our upcoming audition dates and details.</p>' . "\n\n" . '[tm_auditions]',
+            'template' => 'default'
+        ),
+        'TM_Awards' => array(
+            'content' => '<h2>Theatre Awards & Honors</h2><p>Celebrating the achievements and accolades of our talented performers and productions.</p>' . "\n\n" . '[tm_awards]',
+            'template' => 'default'
+        ),
+        'TM_Venues' => array(
+            'content' => '<h2>Performance Venues</h2><p>Discover the theatres and venues where our shows take place. Click on any venue for directions and more information.</p>' . "\n\n" . '[tm_venues]',
+            'template' => 'default'
+        ),
+        'TM_Tickets' => array(
+            'content' => '<h2>Get Your Tickets</h2><p>Purchase tickets for the current season or individual shows. Click the buttons below to buy your tickets online.</p>' . "\n\n" . '[tm_tickets]',
             'template' => 'default'
         ),
     );
 
     // Create a parent page for theatre content
     $parent_page_id = wp_insert_post(array(
-        'post_title' => 'TM_Theatre',
-        'post_content' => '<!-- wp:paragraph -->
-<p>Welcome to our theatre section. Explore our shows, meet our cast, and learn about our supporters.</p>
-<!-- /wp:paragraph -->',
+        'post_title' => 'Theatre Manager',
+        'post_content' => '<h2>Theatre Manager Sample Pages</h2><p>Welcome to the Theatre Manager sample content! This section demonstrates all the available shortcodes and displays. Each page below shows a different feature of the plugin.</p><p>You can customize these pages as needed, or create your own pages using the shortcodes referenced in <strong>Theatre Manager → Instructions</strong>.</p>',
         'post_status' => 'publish',
         'post_type' => 'page',
-        'post_name' => 'theatre'
+        'post_name' => 'theatre-manager'
     ));
 
     if (is_wp_error($parent_page_id)) {
@@ -180,8 +151,9 @@ function tm_create_sample_pages() {
 
     // Create each sample page
     foreach ($sample_pages as $title => $details) {
-        // Check if page already exists
-        $existing_page = get_page_by_title($title, OBJECT, 'page');
+        // Check if page already exists by post_name
+        $post_name = sanitize_title($title);
+        $existing_page = get_page_by_path($post_name, OBJECT, 'page');
         if ($existing_page) {
             continue;
         }
@@ -192,31 +164,55 @@ function tm_create_sample_pages() {
             'post_content' => $details['content'],
             'post_status' => 'publish',
             'post_type' => 'page',
+            'post_name' => $post_name,
             'post_parent' => $parent_page_id,
             'page_template' => $details['template']
         ));
 
         if (is_wp_error($page_id)) {
+            error_log('TM Sample Page Error: ' . $title . ' - ' . $page_id->get_error_message());
             continue;
         }
     }
 
-    // Create a menu item for the parent page
+    // Create a menu item for the parent page and sub-items for each sample page
     $menu_name = 'primary';
     $locations = get_nav_menu_locations();
     
     if (isset($locations[$menu_name])) {
         $menu = wp_get_nav_menu_object($locations[$menu_name]);
         
-            if ($menu) {
-            wp_update_nav_menu_item($menu->term_id, 0, array(
-                'menu-item-title' => 'TM_Theatre',
+        if ($menu) {
+            // Create parent menu item
+            $parent_menu_item_id = wp_update_nav_menu_item($menu->term_id, 0, array(
+                'menu-item-title' => 'Theatre Manager',
                 'menu-item-object-id' => $parent_page_id,
                 'menu-item-object' => 'page',
                 'menu-item-status' => 'publish',
                 'menu-item-type' => 'post_type',
                 'menu-item-position' => -1
             ));
+            
+            // Create sub-menu items for each sample page
+            if ($parent_menu_item_id && !is_wp_error($parent_menu_item_id)) {
+                $sub_position = 0;
+                foreach ($sample_pages as $title => $details) {
+                    $post_name = sanitize_title($title);
+                    $page = get_page_by_path($post_name, OBJECT, 'page');
+                    if ($page) {
+                        wp_update_nav_menu_item($menu->term_id, 0, array(
+                            'menu-item-title' => $title,
+                            'menu-item-object-id' => $page->ID,
+                            'menu-item-object' => 'page',
+                            'menu-item-parent-id' => $parent_menu_item_id,
+                            'menu-item-status' => 'publish',
+                            'menu-item-type' => 'post_type',
+                            'menu-item-position' => $sub_position
+                        ));
+                        $sub_position++;
+                    }
+                }
+            }
         }
     }
 
@@ -246,46 +242,71 @@ function tm_render_sample_content_page() {
     }
 
     $message = '';
+    
+    // Handle delete action
+    if (isset($_POST['tm_delete_sample_pages']) && check_admin_referer('tm_delete_sample_pages')) {
+        tm_delete_sample_pages();
+        $message = '<div class="notice notice-info"><p>Sample pages have been deleted.</p></div>';
+    }
+    
+    // Handle create action
     if (isset($_POST['tm_create_sample_pages']) && check_admin_referer('tm_create_sample_pages')) {
+        // Delete existing sample pages first
+        tm_delete_sample_pages();
+        // Then create new ones
         if (tm_create_sample_pages()) {
-            $message = '<div class="notice notice-success"><p>Sample pages have been created successfully!</p></div>';
+            $message = '<div class="notice notice-success"><p>Sample pages have been created successfully! You can view them in the <a href="' . esc_url(admin_url('edit.php?post_type=page')) . '">Pages</a> section.</p></div>';
         } else {
-            $message = '<div class="notice notice-error"><p>There was an error creating the sample pages.</p></div>';
+            $message = '<div class="notice notice-error"><p>There was an error creating the sample pages. Check your server error log for details.</p></div>';
         }
     }
+    
+    // Check if sample pages exist
+    $parent_page = get_page_by_path('theatre-manager', OBJECT, 'page');
+    $pages_exist = !empty($parent_page);
+    
     ?>
     <div class="wrap">
         <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
         <?php echo $message; ?>
         <div class="card">
-            <h2>Create Sample Pages</h2>
-            <p>This will create a set of sample pages for each custom post type in the Theatre Manager plugin. Each page will include appropriate shortcodes and basic content.</p>
-            <p>The following pages will be created:</p>
-            <ul style="list-style-type: disc; margin-left: 20px;">
-                <li>TM_Theatre (parent page)</li>
-                <li>TM_Shows</li>
-                <li>TM_Current_Season</li>
-                <li>TM_Cast_Members</li>
-                <li>TM_Board_Members</li>
-                <li>TM_Sponsors</li>
-                <li>TM_Advertisers</li>
-                <li>TM_Contributors</li>
-                <li>TM_Programs</li>
-                <li>TM_Testimonials</li>
-                <li>TM_Seasons</li>
-                <li>TM_Cast_Grouped</li>
-                <li>TM_Show_Cast</li>
-                <li>TM_Season_Images</li>
-                <li>TM_Season_Shows</li>
-            </ul>
-            <p><strong>Note on placeholder IDs:</strong> A few sample pages (for example <em>TM_Show_Cast</em> and <em>TM_Season_Images</em>) include placeholder IDs such as <code>show_id="123"</code> or <code>season_id="456"</code>. These are intentional — replace the placeholder ID with a real Show or Season post ID after the pages are created. To find a real ID, go to the Shows or Seasons list in the admin and hover over the item; the URL shown in your browser status bar will contain <code>post=ID</code>. Alternatively, edit the created page and paste a valid ID into the shortcode attribute.</p>
-            <p><strong>Note:</strong> Existing pages with the same titles will not be overwritten.</p>
-            <form method="post">
-                <?php wp_nonce_field('tm_create_sample_pages'); ?>
-                <p>
-                    <input type="submit" name="tm_create_sample_pages" class="button button-primary" value="Create Sample Pages">
-                </p>
-            </form>
+            <h2>Theatre Manager Sample Pages</h2>
+            <p>Create demonstration pages for all Theatre Manager shortcodes. Each sample page displays a different shortcode with examples.</p>
+            
+            <?php if ($pages_exist) : ?>
+                <p style="color: green;"><strong>✓ Sample pages have been created.</strong></p>
+                <p>The following pages are available:</p>
+                <ul style="list-style-type: disc; margin-left: 20px; columns: 2;">
+                    <li>Theatre Manager (parent)</li>
+                    <li>TM_Shows</li>
+                    <li>TM_Current_Season</li>
+                    <li>TM_Cast_Members</li>
+                    <li>TM_Board_Members</li>
+                    <li>TM_Sponsors</li>
+                    <li>TM_Advertisers</li>
+                    <li>TM_Contributors</li>
+                    <li>TM_Seasons</li>
+                    <li>TM_Programs</li>
+                    <li>TM_Testimonials</li>
+                    <li>TM_Season_Cast</li>
+                    <li>TM_Show_Cast</li>
+                    <li>TM_Season_Images</li>
+                    <li>TM_Season_Shows</li>
+                    <li>TM_Auditions</li>
+                </ul>
+                <p><a href="<?php echo esc_url(admin_url('edit.php?post_type=page')); ?>" class="button">View All Pages</a></p>
+                <form method="post" style="margin-top: 20px;">
+                    <?php wp_nonce_field('tm_delete_sample_pages'); ?>
+                    <p><input type="submit" name="tm_delete_sample_pages" class="button button-secondary" value="Delete Sample Pages" onclick="return confirm('Are you sure? This will delete all sample pages.');"></p>
+                </form>
+            <?php else : ?>
+                <p style="color: orange;"><strong>✕ Sample pages have not been created yet.</strong></p>
+                <p>Click the button below to create 16 demonstration pages showing all available Theatre Manager shortcodes.</p>
+                <form method="post">
+                    <?php wp_nonce_field('tm_create_sample_pages'); ?>
+                    <p><input type="submit" name="tm_create_sample_pages" class="button button-primary" value="Create Sample Pages"></p>
+                </form>
+            <?php endif; ?>
         </div>
     </div>
     <?php
