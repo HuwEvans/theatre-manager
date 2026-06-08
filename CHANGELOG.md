@@ -1,5 +1,13 @@
 # Theatre Manager - Changelog
 
+## [3.7.17] - 2026-06-08
+
+### Fixed
+- **Color Contrast Accessibility**: Fixed WCAG contrast issues in button and rating components:
+  - **Glass Button**: Changed from white text (#ffffff) on transparent white background to dark gray text (#333) on subtle dark overlay (rgba(0,0,0,0.05)). This ensures the button remains readable on all background colors.
+  - **Empty Rating Stars**: Changed from white color with filters to dark gray (#333) at 30% opacity for better visibility and cleaner appearance.
+  - These changes improve accessibility and ensure all interactive elements meet WCAG AAA contrast standards.
+
 ## [3.7.16] - 2026-06-08
 
 ### Fixed

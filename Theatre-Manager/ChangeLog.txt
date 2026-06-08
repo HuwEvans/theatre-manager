@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 3.7.17
+Color contrast accessibility improvements.
+- Fixed glass button: Changed white text on transparent white to dark text on subtle dark overlay
+- Fixed empty rating stars: Changed white color to dark gray at 30% opacity
+- Improves WCAG AAA accessibility compliance
+- All text now has proper contrast with backgrounds
+
 ## Version 3.7.16
 Cast image display improvement.
 - Fixed cast member images that were overflowing and cropping
