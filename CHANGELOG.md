@@ -1,5 +1,10 @@
 # Theatre Manager - Changelog
 
+## [3.7.16] - 2026-06-08
+
+### Fixed
+- **Cast Image Display**: Changed cast member images from `object-fit: cover` (which cropped images) to `object-fit: contain` so the entire picture is visible within the allocated space. Added light gray background (#f0f0f0) for clean appearance when images don't fill the full aspect ratio. Images remain fully responsive and scale based on castcols parameter.
+
 ## [3.7.15] - 2026-06-08
 
 ### Fixed

@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 3.7.16
+Cast image display improvement.
+- Fixed cast member images that were overflowing and cropping
+- Changed object-fit from cover to contain to show entire picture
+- Added light gray background (#f0f0f0) for clean appearance
+- Images remain fully responsive and scale with castcols parameter
+
 ## Version 3.7.15
 Critical bug fix for cast grid layout.
 - Fixed critical issue where castwithbio field displayed only one column with very large images
