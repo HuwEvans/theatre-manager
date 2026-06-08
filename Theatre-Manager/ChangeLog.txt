@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 3.7.18
+Comprehensive tm_landingpage shortcode requirements documentation.
+- Created TM_LANDINGPAGE_REQUIREMENTS.md with complete specification
+- Documents all 13 available fields: show_name, show_image, author, sub_authors, director, associate_director, producer, stage_manager, synopsis, show_dates, ticket_url, cast, castwithbio, venue
+- Specifies all parameters: show_id, field_list, castcols, urlbutton, buttonformat
+- Default output structure with headings and separators
+- Each field displays on separate line, inherits parent page formatting
+- Cast grid responsive: desktop/tablet/mobile with column-based image sizing
+- Full alignment inheritance from Gutenberg, Beaver Builder, theme classes
+- WCAG AAA accessibility compliance
+
 ## Version 3.7.17
 Color contrast accessibility improvements.
 - Fixed glass button: Changed white text on transparent white to dark text on subtle dark overlay

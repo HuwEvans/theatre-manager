@@ -3,25 +3,91 @@
  * Landing Page Shortcode
  * Displays detailed information about a specific show
  * 
- * Usage:
- * [tm_landingpage show_id="123"]
- * [tm_landingpage show_id="current"]
- * [tm_landingpage show_id="123" field_list="show_name,show_image,author,director,synopsis,cast,ticket_url"]
+ * SHORTCODE NAME: tm_landingpage
+ * PURPOSE: Displays comprehensive information about a specific theatre show
  * 
- * Available Fields:
- * - show_name: The show title
- * - show_image: The show's main image
- * - author: Show author
- * - sub_authors: Additional authors
+ * USAGE:
+ * [tm_landingpage show_id="current"]
+ * [tm_landingpage show_id="123"]
+ * [tm_landingpage show_id="123" field_list="show_name,show_image,author,director,synopsis,castwithbio,venue"]
+ * 
+ * PARAMETERS:
+ * - show_id (required): Show ID or "current" to display the current show (default: "current")
+ * - field_list (optional): Comma-separated list of fields in display order (default: all fields)
+ * - castcols (optional): Number of columns for castwithbio field, 1-6 (default: 3)
+ * - urlbutton (optional): Display ticket URL as button "true" or "false" (default: "false")
+ * - buttonformat (optional): Button style format (default, modern, minimal, outline, gradient, prominent, success, ghost, glass)
+ * - hard_breaks (optional): "true" or "false" - not recommended to change (default: "true")
+ * 
+ * AVAILABLE FIELDS:
+ * - show_name: Show title
+ * - show_image: Show poster/main image
+ * - author: Primary author/playwright
+ * - sub_authors: Additional authors/co-writers
  * - director: Director name
- * - associate_director: Associate director name
+ * - associate_director: Associate/Assistant director name
  * - producer: Producer name
  * - stage_manager: Stage manager name
- * - synopsis: Show synopsis/description
- * - show_dates: Show performance dates and times
- * - ticket_url: Link to purchase tickets
- * - cast: Cast member information (character name, actor name, bio)
- * - venue: Venue information
+ * - synopsis: Show description/synopsis
+ * - show_dates: Performance dates and times
+ * - ticket_url: Link to ticket purchase page
+ * - cast: Cast member list (simple format: Character Name - Actor Name)
+ * - castwithbio: Cast with photos in responsive grid (respects castcols parameter, 1-6 columns)
+ * - venue: Venue name, address, phone, and website
+ * 
+ * FIELD FORMATTING:
+ * - Each field displays on a separate line
+ * - All fields inherit alignment and text styling from parent page/block context
+ * - No plugin-specific styling applied (colors, fonts, sizes inherit from page)
+ * - All text properties inherited: font-family, font-size, color, font-weight, line-height, letter-spacing, text-transform
+ * - Images automatically center when parent is centered
+ * - Images display at full width with responsive sizing
+ * 
+ * DEFAULT OUTPUT (when all fields displayed):
+ * [Show name]
+ * [Show image]
+ * Written by: [author]
+ * Co-writers: [sub_authors]
+ * Directed by: [director]
+ * Assistant Director: [associate_director]
+ * Produced by: [producer]
+ * Stage Managed by: [stage_manager]
+ * ----
+ * [Heading: About the Show]
+ * [synopsis]
+ * [Get Tickets button]
+ * ----
+ * [Heading: Meet the Cast]
+ * [cast in responsive grid - 3 columns default]
+ *   Character Name
+ *   Played by: Actor Name
+ *   Actor bio
+ * ----
+ * [Heading: Show Times and Ticket Info]
+ * [show_dates]
+ * [Get Tickets button]
+ * ----
+ * [Heading: Theatre Info]
+ * [venue name, address, phone, map link]
+ * ----
+ * 
+ * ENTIRE OUTPUT IS CENTERED
+ * 
+ * CAST WITH BIO DETAILS (castwithbio field):
+ * - Displays in responsive grid layout
+ * - castcols parameter controls column count (1-6, default 3)
+ * - Desktop (>1024px): Full castcols columns
+ * - Tablet (1024px-768px): min(castcols, 2) columns
+ * - Mobile (<768px): min(castcols, 1) column (single column minimum)
+ * - Images: Responsive sizing based on column count, maintain 3/4 aspect ratio
+ * - Each cast member shows: Photo | Character Name | "Played by: Actor Name" | Bio
+ * 
+ * ALIGNMENT INHERITANCE:
+ * - Gutenberg block alignment (center/left/right/justify)
+ * - Beaver Builder column alignment
+ * - Theme-specific alignment classes
+ * - CSS uses sibling selectors to detect and apply alignment
+ * - All nested elements fully inherit parent alignment and text properties
  */
 
 if (!defined('ABSPATH')) {

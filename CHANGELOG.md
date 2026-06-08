@@ -1,5 +1,26 @@
 # Theatre Manager - Changelog
 
+## [3.7.18] - 2026-06-08
+
+### Documentation
+- **Comprehensive tm_landingpage Shortcode Requirements**: Created comprehensive requirements documentation (`TM_LANDINGPAGE_REQUIREMENTS.md`) specifying:
+  - Shortcode name, purpose, and usage
+  - All parameters (show_id, field_list, castcols, urlbutton, buttonformat)
+  - All 13 available fields (show_name, show_image, author, sub_authors, director, associate_director, producer, stage_manager, synopsis, show_dates, ticket_url, cast, castwithbio, venue)
+  - Field display rules: each field on separate line, no plugin-specific styling, parent page formatting inheritance
+  - Default output structure with headings, separators, and layout
+  - Cast with bio grid responsiveness (desktop/tablet/mobile breakpoints)
+  - Alignment inheritance from Gutenberg, Beaver Builder, and theme-specific classes
+  - Technical implementation details and CSS class structure
+- **Enhanced Shortcode Documentation**: Updated tm_landingpage.php header with detailed parameter descriptions, field list, default output structure, and alignment inheritance explanation
+
+### Features
+- All 13 fields documented with descriptions and default display format
+- Clear parameter documentation for show_id, field_list, castcols, urlbutton, buttonformat
+- Responsive cast grid with column-based image sizing (1-6 columns)
+- Full alignment inheritance from surrounding page context
+- WCAG AAA accessibility compliance with proper color contrast
+
 ## [3.7.17] - 2026-06-08
 
 ### Fixed
