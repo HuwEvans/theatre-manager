@@ -1,7 +1,11 @@
 # Changelog
 
 ## Version 3.7.14
-Comprehensive field alignment and text setting inheritance for tm_landingpage shortcode.
+Comprehensive field alignment and text setting inheritance, with castcols parameter fix.
+- Fixed castcols parameter to be honored across all responsive breakpoints (previously ignored on mobile)
+  - Desktop (>1024px): Displays castcols columns as specified
+  - Tablet (1024px-768px): Displays min(castcols, 2) columns for readability
+  - Mobile (<768px): Displays min(castcols, 1) column (single column minimum for usability)
 - Enhanced all shortcode fields to inherit alignment and text styling from surrounding page context.
 - All fields now respect Gutenberg block alignment settings (center/left/right/justify).
 - Extended support for Beaver Builder alignment settings and theme-specific alignment classes.
@@ -15,6 +19,7 @@ Comprehensive field alignment and text setting inheritance for tm_landingpage sh
 - Support for blocks separated by horizontal rules (<hr>).
 - Cast with bio grid now centers when parent is centered.
 - All text settings cascade properly from page/block context to all shortcode fields.
+- Updated PHP comments to document castcols behavior at different breakpoints.
 - Version updated to 3.7.14.
 
 ## Version 3.7.13

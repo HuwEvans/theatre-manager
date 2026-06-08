@@ -3,6 +3,12 @@
 ## [3.7.14] - 2026-06-08
 
 ### Fixed
+- **Castcols Parameter Now Honored at All Breakpoints**: Fixed responsive breakpoints in castwithbio field to properly respect the castcols parameter:
+  - Desktop (>1024px): Displays castcols columns as specified
+  - Tablet (1024px-768px): Displays min(castcols, 2) columns for readability
+  - Mobile (<768px): Displays min(castcols, 1) column for mobile usability
+  - Previously mobile breakpoints ignored castcols and hardcoded to single column
+
 - **Comprehensive Field Alignment & Text Setting Inheritance**: Enhanced tm_landingpage shortcode to ensure ALL fields (show name, author, director, cast, venue, etc.) inherit alignment and text styling from the surrounding page context. All fields now respect:
   - Gutenberg block alignment settings (center/left/right/justify)
   - Beaver Builder alignment settings

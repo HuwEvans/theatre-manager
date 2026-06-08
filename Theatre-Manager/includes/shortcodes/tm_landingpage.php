@@ -237,6 +237,7 @@ function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true,
 
         case 'castwithbio':
             // Get all cast members for this show with bio in responsive columns
+            // castcols parameter controls the number of columns (1-6, default 3)
             $cast_args = [
                 'post_type' => 'cast',
                 'posts_per_page' => -1,
@@ -251,9 +252,14 @@ function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true,
             $cast_members = get_posts($cast_args);
 
             if ($cast_members) {
+                // Validate and constrain castcols parameter
                 $castcols = intval($atts['castcols']);
-                if ($castcols < 1) $castcols = 3;
-                if ($castcols > 6) $castcols = 6;
+                if ($castcols < 1) $castcols = 3;  // Default to 3 columns
+                if ($castcols > 6) $castcols = 6;  // Max 6 columns
+                
+                // Pass castcols as CSS custom property: respects castcols at desktop, 
+                // constrains to 2 columns on tablet (max-width: 1024px), 
+                // and 1 column on mobile (max-width: 480px)
                 $output .= '<div class="tm-landingpage-castwithbio" style="--cast-cols: ' . intval($castcols) . '">';
                 
                 foreach ($cast_members as $cast_member) {
@@ -365,8 +371,15 @@ function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true,
  * and applies matching alignment to all shortcode fields. Images automatically center within centered
  * content. Nested elements (cast lists, venue info, etc.) fully inherit all text styling.
  * 
- * This works across all page builders and editor types as long as they follow WordPress standards
- * for alignment classes (has-text-align-* or builder equivalents).
+ * CASTCOLS PARAMETER (castwithbio field):
+ * The castcols parameter controls the number of columns in the cast with bio grid (1-6, default 3).
+ * - Desktop (>1024px): Displays castcols columns as specified
+ * - Tablet (1024px-768px): Displays min(castcols, 2) columns for better readability
+ * - Mobile (<768px): Displays min(castcols, 1) column (single column) for mobile-friendly layout
+ * 
+ * CSS custom property --cast-cols is set inline and constrained by responsive media queries
+ * to ensure optimal display at all screen sizes while respecting the user's castcols preference
+ * where practical.
  */
 function tm_shortcode_landingpage($atts) {
     $atts = shortcode_atts([

@@ -651,7 +651,7 @@
     flex-grow: 1;
 }
 
-/* Responsive breakpoints for smaller screens */
+/* Responsive breakpoints for smaller screens - Honor castcols but constrain for mobile */
 @media (max-width: 1024px) {
     .tm-landingpage-castwithbio {
         grid-template-columns: repeat(min(var(--cast-cols, 3), 2), 1fr);
@@ -670,42 +670,36 @@
 
 @media (max-width: 768px) {
     .tm-landingpage-castwithbio {
-        grid-template-columns: 1fr;
+        /* Honor castcols but constrain to max 2 columns on tablet */
+        grid-template-columns: repeat(min(var(--cast-cols, 3), 2), 1fr);
         gap: 15px;
     }
     
     .tm-cast-column {
         padding: 12px;
-        display: grid;
-        grid-template-columns: 120px 1fr;
-        gap: 12px;
-        align-items: start;
+        /* Reset the grid layout that was only used for single column */
+        display: flex;
+        flex-direction: column;
     }
     
     .tm-cast-image {
         height: 140px;
-        margin-bottom: 0;
-        grid-row: 1 / 5;
+        margin-bottom: 10px;
     }
     
     .tm-cast-character {
-        grid-column: 2;
-        margin: 0 0 4px 0;
+        margin: 8px 0 4px 0;
     }
     
     .tm-cast-actor {
-        grid-column: 2;
         margin: 0 0 8px 0;
-    }
-    
-    .tm-cast-bio {
-        grid-column: 2;
     }
 }
 
 @media (max-width: 480px) {
     .tm-landingpage-castwithbio {
-        grid-template-columns: 1fr;
+        /* On small mobile, constrain to 1 column minimum, but honor castcols if set to 1 */
+        grid-template-columns: repeat(max(1, min(var(--cast-cols, 3), 1)), 1fr);
         gap: 12px;
     }
     
