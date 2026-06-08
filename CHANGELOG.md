@@ -1,5 +1,21 @@
 # Theatre Manager - Changelog
 
+## [3.7.11] - 2026-06-08
+
+### Added
+- **URL Button Display**: Added `urlbutton` parameter to tm_landingpage shortcode to display ticket URLs as styled buttons.
+- **Button Format Options**: Added `buttonformat` parameter with 9 comprehensive styling options (default, modern, minimal, outline, gradient, prominent, success, ghost, glass).
+- **Button Styling**: Comprehensive CSS button styles with hover effects, transitions, and responsive sizing.
+- **Fixed castcols Parameter**: Fixed issue where castcols parameter wasn't being passed to field rendering function for castwithbio field.
+
+### Changed
+- **Function Signature**: Updated `tm_render_landingpage_field()` to accept $atts parameter for proper parameter passing.
+- **Ticket URL Rendering**: Enhanced to support both link and button display modes based on urlbutton parameter.
+- **Version Update**: Plugin version moved from 3.7.10 to 3.7.11.
+
+### Documentation
+- **shortcode_usage.txt**: Updated tm_landingpage section with urlbutton and buttonformat parameters, button format descriptions, and usage examples.
+
 ## [3.7.10] - 2026-06-08
 
 ### Added
