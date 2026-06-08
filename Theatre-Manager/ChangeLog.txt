@@ -1,5 +1,105 @@
 # Changelog
 
+## Version 3.7.12
+Button alignment fix - ensures Get Tickets button centers with page content.
+- Fixed button centering by explicitly setting .tm-landingpage-wrapper text-align to center
+- Buttons now properly align with centered page layout
+- Version updated to 3.7.12
+
+## Version 3.7.11
+URL button display and comprehensive button styling options.
+- Added urlbutton parameter to tm_landingpage shortcode to display ticket URLs as styled buttons instead of text links.
+- Added buttonformat parameter with 9 comprehensive styling options: default, modern, minimal, outline, gradient, prominent, success, ghost, glass.
+- Implemented comprehensive CSS button styling with hover effects, transitions, and responsive sizing.
+- Fixed castcols parameter passing to field rendering function for proper castwithbio column control.
+- Updated tm_render_landingpage_field() to accept and use shortcode attributes for parameter passing.
+- Removed hardcoded text-align: center from .tm-url-button base class for proper alignment inheritance.
+- Landing page wrapper and field divs now inherit text-align from parent containers for proper alignment inheritance.
+- Fixed button alignment to conform to page/container text-align properties (center, left, right).
+- Updated shortcode_usage.txt with complete button parameter documentation and usage examples.
+- Updated plugin version metadata and public version constant to 3.7.11.
+
+## Version 3.7.10
+Show dates HTML editor and castwithbio display improvements.
+- Made show_dates field editable with HTML in Season Builder using TinyMCE rich text editor.
+- Added "Played by" prefix to actor names in castwithbio shortcode field for better readability.
+- Updated show_dates sanitization to use wp_kses_post() for HTML support.
+- Updated plugin version metadata and public version constant to 3.7.10.
+
+## Version 3.7.9
+Season Builder cast bio and show production fields.
+- Added bio textarea field to cast rows in Season Builder for editing actor biographies.
+- Added producer and stage_manager fields to Show form in Season Builder.
+- Updated JavaScript templates to include new fields in dynamic row creation.
+- Updated cast and show form table column widths and sanitization logic.
+- Updated plugin version metadata and public version constant to 3.7.9.
+
+## Version 3.7.8
+Castwithbio column control and responsive image sizing.
+- Added castcols parameter to tm_landingpage shortcode castwithbio field (range 1-6, default 3).
+- Reduced cast image heights for better column fit: 180px desktop, 160px tablet, 140px mobile.
+- Implemented CSS Grid with CSS custom properties for dynamic column control.
+- Updated responsive media queries with grid-column min() function for tablet adaptation.
+- Updated shortcode_usage.txt with castcols parameter documentation and usage examples.
+- Updated plugin version metadata and public version constant to 3.7.8.
+
+## Version 3.7.7
+Cast biography field integration.
+- Added bio field to cast post type (_tm_cast_bio meta field).
+- Integrated bio display into castwithbio shortcode field with HTML preservation.
+- Bio displays below actor name in responsive grid columns.
+- Updated plugin version metadata and public version constant to 3.7.7.
+
+## Version 3.7.6
+Responsive cast grid with biography support.
+- Added castwithbio field to tm_landingpage shortcode for responsive grid display of cast members.
+- Displays picture, character name, actor name, and biography in responsive columns.
+- Implemented CSS Grid with auto-fit columns, gap spacing, and proper image sizing.
+- Added hard_breaks documentation explaining block-level vs inline display impact.
+- Implemented smart conditional wrapping for different content types.
+- Updated shortcode_usage.txt with comprehensive castwithbio field documentation.
+- Updated plugin version metadata and public version constant to 3.7.6.
+
+## Version 3.4
+Auditions shortcode update.
+- Added the `TM_Auditions` shortcode to list upcoming auditions in ascending audition-date order.
+- Updated plugin version metadata and public version constant to 3.4.
+
+## Version 3.3
+Season Builder v1.4 update.
+- Added audition date and rich-text audition details to Shows.
+- Added those audition fields to the Season Builder so they can be edited from the same two-tab screen.
+- Renamed builder `Actions` columns to `Remove` to avoid confusion with saved fields.
+- Updated plugin version metadata and public version constant to 3.3.
+
+## Version 3.2
+Season Builder v1.2/v1.3 update.
+- Added a Media tab for season images, show image/program media, and cast headshots.
+- Added the remaining Season and Show fields to the builder, including current/upcoming season flags and full show details.
+- Switching between builder tabs now saves before changing tabs.
+- Updated plugin version metadata and public version constant to 3.2.
+
+## Version 3.1
+Season Builder v1.1 update.
+- Removed rows in Season Builder (Shows/Cast/Awards) are now moved to Trash when saving.
+- Updated plugin version metadata and public version constant to 3.1.
+
+## Version 3.0
+Season Builder first release.
+- Added Season Builder admin page to manage Season, Shows, Cast, and Awards in one screen.
+- Added linked save flow to create/update related data from a single form.
+- Added Awards CPT and integrated award editing into Season Builder.
+- Updated plugin version metadata and public version constant to 3.0.
+
+## Version 2.8
+Security and stability release.
+- Fixed cast image rendering in `tm_show_cast` and `tm_season_cast` when image meta stores attachment IDs.
+- Escaped unescaped title output in `tm_shows`.
+- Fixed malformed inline style strings and corrected shadow option behavior in season shortcodes.
+- Added CSS color sanitization helper and applied it to shortcode-generated style blocks.
+- Sanitized/validated display options tab query parameter.
+- Updated plugin version metadata and version constant to 2.8.
+
 ## Version 2.0
 Major release: consolidated shortcodes, added sample content tooling and documentation, moved tests out of plugin, improved image/pdf preview troubleshooting and program preview behavior.
 

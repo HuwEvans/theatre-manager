@@ -1,5 +1,10 @@
 # Theatre Manager - Changelog
 
+## [3.7.12] - 2026-06-08
+
+### Fixed
+- **Button Centering**: Fixed issue where Get Tickets button was not centering with page content. Explicitly set `.tm-landingpage-wrapper` to `text-align: center` to ensure proper button alignment.
+
 ## [3.7.11] - 2026-06-08
 
 ### Added
