@@ -970,12 +970,14 @@
     text-align: center;
 }
 
-/* Cast with bio grid - inherit alignment and center when parent is centered */
+/* Cast with bio grid - inherit alignment and respect castcols */
 .tm-landingpage-castwithbio {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(var(--cast-cols, 3), 1fr);
+    gap: 25px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
     text-align: inherit;
 }
 
