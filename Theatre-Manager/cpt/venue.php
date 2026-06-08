@@ -59,8 +59,8 @@ function tm_register_venue_cpt() {
         'menu_icon' => 'dashicons-location-alt',
         'supports' => array(''),
         'has_archive' => true,
-        'show_in_menu' => get_option('tm_show_builder_cpt_menus', '1') ? 'theatre-manager' : false,
-    );
+        'show_in_menu' => get_option('tm_show_builder_cpt_menus', '1') ? 'theatre-manager' : false,        'capability_type' => 'post',
+        'map_meta_cap' => true,    );
 
     register_post_type('venue', $args);
 }

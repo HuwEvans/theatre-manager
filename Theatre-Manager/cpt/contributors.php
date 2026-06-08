@@ -32,6 +32,8 @@ function tm_register_contributor_cpt() {
         'supports' => array(''),
 		'show_in_menu' => 'theatre-manager',
         'show_in_rest' => false,
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
     );
 
     register_post_type('contributor', $args);

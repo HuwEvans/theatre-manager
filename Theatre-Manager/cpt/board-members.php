@@ -17,6 +17,8 @@ function tm_register_board_members_cpt() {
         'supports' => array(''), // No editor or custom fields
         'show_in_rest' => false,
         'show_in_menu' => 'theatre-manager', // Ensures CPT appears under Theatre Manager menu
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
     );
 
     register_post_type('board_member', $args);

@@ -56,6 +56,8 @@ function tm_register_season_cpt() {
         'has_archive' => false,
         'rewrite' => array('slug' => 'season'),
         'show_in_rest' => true,
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
     );
     register_post_type('season', $args);
 }

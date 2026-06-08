@@ -29,6 +29,8 @@ function tm_register_cast_cpt() {
         'supports' => array(''),
         'has_archive' => true,
         'show_in_menu' => get_option('tm_show_builder_cpt_menus', '1') ? 'theatre-manager' : false,
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
     );
 
     register_post_type('cast', $args);
