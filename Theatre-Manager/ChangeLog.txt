@@ -1,7 +1,17 @@
 # Changelog
 
 ## Version 3.7.14
-Comprehensive field alignment and text setting inheritance, with castcols parameter fix.
+Comprehensive fixes: custom post type capabilities, responsive image scaling, castcols honoring, and field alignment inheritance.
+- Fixed custom post type capability issue preventing users from editing posts
+  - Added 'capability_type' => 'post' and 'map_meta_cap' => true to all 10 CPTs
+  - Resolves "Sorry, you are not allowed to edit posts in this post type" error
+  - Applies to: show, cast, season, venue, award, advertiser, board_member, sponsor, testimonial, contributor
+- Enhanced cast member image sizing for responsive display
+  - Images now scale based on castcols parameter: 300px (1 col) to 210px (6 cols)
+  - Uses formula: height = calc(300px - (castcols * 15px)) with max() fallback
+  - Added aspect-ratio: 3/4 for consistent portrait headshots
+  - Desktop: 300-210px, Tablet: 270-200px, Mobile: 220-160px
+  - All images remain fully responsive to container width
 - Fixed castcols parameter to be honored across all responsive breakpoints (previously ignored on mobile)
   - Desktop (>1024px): Displays castcols columns as specified
   - Tablet (1024px-768px): Displays min(castcols, 2) columns for readability

@@ -3,6 +3,16 @@
 ## [3.7.14] - 2026-06-08
 
 ### Fixed
+- **Custom Post Type Capabilities**: Added `capability_type` and `map_meta_cap` to all 10 custom post types (show, cast, season, venue, award, advertiser, board_member, sponsor, testimonial, contributor). This fixes the "Sorry, you are not allowed to edit posts in this post type" error by enabling proper capability mapping for WordPress.
+
+- **Responsive Cast Image Sizing**: Cast member photos in castwithbio field now scale responsively based on the castcols parameter:
+  - Images use aspect-ratio: 3/4 (portrait) for consistent headshots
+  - Desktop: Height scales from 300px (1 col) to 210px (6 cols) using formula: calc(300px - (castcols * 15px))
+  - Tablet: Height scales from 270px to 200px with tighter constraints
+  - Mobile: Height scales from 220px to 160px for optimal mobile viewing
+  - All images remain fully responsive to container width
+  - Images never exceed max constraints for performance and aesthetics
+
 - **Castcols Parameter Now Honored at All Breakpoints**: Fixed responsive breakpoints in castwithbio field to properly respect the castcols parameter:
   - Desktop (>1024px): Displays castcols columns as specified
   - Tablet (1024px-768px): Displays min(castcols, 2) columns for readability
