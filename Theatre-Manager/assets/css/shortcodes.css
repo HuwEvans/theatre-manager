@@ -867,37 +867,140 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-/* Landing Page Wrapper - Match surrounding Gutenberg block alignment */
+/* Landing Page Wrapper - Inherit all text settings from surrounding context */
 .tm-landingpage-wrapper,
-.tm-landingpage-wrapper.tm-landingpage,
-.tm-landingpage-field {
-    /* Default to left alignment, but CSS selectors below will override */
+.tm-landingpage-wrapper.tm-landingpage {
+    /* Inherit text properties from parent/surrounding context */
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    text-decoration: inherit;
+    text-transform: inherit;
+    direction: inherit;
+    
+    /* Default alignment, overridden by context below */
     text-align: left;
 }
 
-/* Match center alignment when following centered Gutenberg blocks */
+/* Field containers inherit all styling from wrapper */
+.tm-landingpage-field {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    text-decoration: inherit;
+    text-transform: inherit;
+    direction: inherit;
+    text-align: inherit;
+}
+
+/* Ensure nested elements (lists, divs) fully inherit alignment */
+.tm-landingpage-field > *,
+.tm-landingpage-wrapper > * {
+    text-align: inherit;
+}
+
+.tm-landingpage-cast-list,
+.tm-landingpage-cast-item,
+.tm-landingpage-castwithbio,
+.tm-landingpage-venue {
+    text-align: inherit;
+}
+
+/* Images should center naturally when wrapper is centered */
+.tm-landingpage-field img,
+.tm-landingpage-wrapper img,
+.tm-cast-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Center alignment - detect from preceding Gutenberg/Beaver Builder blocks */
 .has-text-align-center + .tm-landingpage-wrapper,
 .has-text-align-center + hr + .tm-landingpage-wrapper,
 .has-text-align-center + hr + hr + .tm-landingpage-wrapper,
 .wp-block-paragraph.has-text-align-center + .tm-landingpage-wrapper,
-.wp-block-paragraph.has-text-align-center + hr + .tm-landingpage-wrapper {
+.wp-block-paragraph.has-text-align-center + hr + .tm-landingpage-wrapper,
+.fl-col.fl-col-text-center + .tm-landingpage-wrapper,
+.bb-align-center + .tm-landingpage-wrapper {
     text-align: center;
 }
 
-/* Match left alignment when following left-aligned blocks */
+/* Left alignment - explicit left-align setting */
 .has-text-align-left + .tm-landingpage-wrapper,
 .has-text-align-left + hr + .tm-landingpage-wrapper,
 .wp-block-paragraph.has-text-align-left + .tm-landingpage-wrapper,
-.wp-block-paragraph.has-text-align-left + hr + .tm-landingpage-wrapper {
+.wp-block-paragraph.has-text-align-left + hr + .tm-landingpage-wrapper,
+.fl-col.fl-col-text-left + .tm-landingpage-wrapper,
+.bb-align-left + .tm-landingpage-wrapper {
     text-align: left;
 }
 
-/* Match right alignment when following right-aligned blocks */
+/* Right alignment - explicit right-align setting */
 .has-text-align-right + .tm-landingpage-wrapper,
 .has-text-align-right + hr + .tm-landingpage-wrapper,
 .wp-block-paragraph.has-text-align-right + .tm-landingpage-wrapper,
-.wp-block-paragraph.has-text-align-right + hr + .tm-landingpage-wrapper {
+.wp-block-paragraph.has-text-align-right + hr + .tm-landingpage-wrapper,
+.fl-col.fl-col-text-right + .tm-landingpage-wrapper,
+.bb-align-right + .tm-landingpage-wrapper {
     text-align: right;
+}
+
+/* Justify alignment - for blocks set to justified */
+.has-text-align-justify + .tm-landingpage-wrapper,
+.has-text-align-justify + hr + .tm-landingpage-wrapper {
+    text-align: justify;
+}
+
+/* Support for theme-specific centering classes */
+.wp-has-text-align-center + .tm-landingpage-wrapper,
+.entry-content .text-center + .tm-landingpage-wrapper,
+.centered + .tm-landingpage-wrapper,
+.center + .tm-landingpage-wrapper {
+    text-align: center;
+}
+
+/* Cast with bio grid - inherit alignment and center when parent is centered */
+.tm-landingpage-castwithbio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    text-align: inherit;
+}
+
+.tm-cast-column {
+    text-align: center;
+}
+
+/* Ensure lists display as block elements and center content appropriately */
+.tm-landingpage-cast-list {
+    display: block;
+}
+
+.tm-landingpage-cast-item {
+    display: block;
+}
+
+/* Mixed content (image + text) should maintain wrapper alignment */
+.tm-landingpage-mixed {
+    text-align: inherit;
+}
+
+/* Non-hard-breaks inline image should inherit wrapper alignment */
+.tm-landingpage-image-inline {
+    display: inline-block;
+    text-align: inherit;
 }
 
 /* Responsive button adjustments */

@@ -351,6 +351,22 @@ function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true,
 
 /**
  * Shortcode handler
+ * 
+ * ALIGNMENT AND TEXT SETTINGS:
+ * All fields in this shortcode automatically inherit alignment and text styling from the surrounding
+ * page context. This includes:
+ * 
+ * - Gutenberg block alignment (has-text-align-center, has-text-align-left, has-text-align-right)
+ * - Beaver Builder alignment settings (fl-col text alignment classes)
+ * - Theme-specific alignment classes (centered, center, etc.)
+ * - All inherited text properties: font-family, font-size, color, font-weight, line-height, etc.
+ * 
+ * The CSS in assets/css/shortcodes.css uses sibling selectors to detect preceding block alignment
+ * and applies matching alignment to all shortcode fields. Images automatically center within centered
+ * content. Nested elements (cast lists, venue info, etc.) fully inherit all text styling.
+ * 
+ * This works across all page builders and editor types as long as they follow WordPress standards
+ * for alignment classes (has-text-align-* or builder equivalents).
  */
 function tm_shortcode_landingpage($atts) {
     $atts = shortcode_atts([

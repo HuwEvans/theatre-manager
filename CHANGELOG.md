@@ -3,7 +3,19 @@
 ## [3.7.14] - 2026-06-08
 
 ### Fixed
-- **Gutenberg Block Alignment Detection**: Button now automatically detects and matches the alignment of preceding Gutenberg blocks. Uses CSS sibling selectors to detect `has-text-align-center`, `has-text-align-left`, and `has-text-align-right` classes on surrounding content and applies matching alignment to the button and shortcode wrapper.
+- **Comprehensive Field Alignment & Text Setting Inheritance**: Enhanced tm_landingpage shortcode to ensure ALL fields (show name, author, director, cast, venue, etc.) inherit alignment and text styling from the surrounding page context. All fields now respect:
+  - Gutenberg block alignment settings (center/left/right/justify)
+  - Beaver Builder alignment settings
+  - Theme-specific alignment classes
+  - All inherited text properties: font-family, font-size, color, font-weight, line-height, letter-spacing, text-transform, and more
+  - Nested elements (cast lists, venue info) fully inherit parent styling
+  - Images automatically center within centered content
+
+- **Enhanced CSS Sibling Selectors**: Extended alignment detection to support:
+  - Gutenberg: `has-text-align-*` and `wp-block-paragraph` classes
+  - Beaver Builder: `fl-col` text alignment classes
+  - Theme-specific: `centered`, `center`, and other common alignment classes
+  - Support for blocks separated by horizontal rules (`<hr>`)
 
 ## [3.7.13] - 2026-06-08
 

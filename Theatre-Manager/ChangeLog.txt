@@ -1,12 +1,21 @@
 # Changelog
 
 ## Version 3.7.14
-Gutenber block alignment detection for buttons.
-- Added CSS sibling selectors to detect preceding Gutenberg block alignment (has-text-align-center, has-text-align-left, has-text-align-right)
-- Button and shortcode wrapper now automatically match the alignment of surrounding blocks
-- Handles alignment even when blocks are separated by horizontal rule elements
-- Works with Gutenberg, Beaver Builder, and any block editor using alignment classes
-- Version updated to 3.7.14
+Comprehensive field alignment and text setting inheritance for tm_landingpage shortcode.
+- Enhanced all shortcode fields to inherit alignment and text styling from surrounding page context.
+- All fields now respect Gutenberg block alignment settings (center/left/right/justify).
+- Extended support for Beaver Builder alignment settings and theme-specific alignment classes.
+- Fields inherit all text properties: font-family, font-size, color, font-weight, line-height, letter-spacing, text-transform, direction.
+- Nested elements (cast lists, venue info) fully inherit parent styling and alignment.
+- Images automatically center within centered content using display: block and auto margins.
+- Enhanced CSS sibling selectors to detect:
+  - Gutenberg: has-text-align-* and wp-block-paragraph classes
+  - Beaver Builder: fl-col text alignment classes
+  - Theme-specific: centered, center, and other common alignment classes
+- Support for blocks separated by horizontal rules (<hr>).
+- Cast with bio grid now centers when parent is centered.
+- All text settings cascade properly from page/block context to all shortcode fields.
+- Version updated to 3.7.14.
 
 ## Version 3.7.13
 Block alignment inheritance for buttons.
