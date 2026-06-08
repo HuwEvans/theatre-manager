@@ -11,10 +11,11 @@
 ### Changed
 - **Function Signature**: Updated `tm_render_landingpage_field()` to accept $atts parameter for proper parameter passing.
 - **Ticket URL Rendering**: Enhanced to support both link and button display modes based on urlbutton parameter.
+- **Page Alignment Support**: Landing page wrapper and field divs now inherit text-align from parent containers (WordPress center alignment, custom CSS classes, etc.), ensuring buttons conform to page alignment.
 - **Version Update**: Plugin version moved from 3.7.10 to 3.7.11.
 
-### Documentation
-- **shortcode_usage.txt**: Updated tm_landingpage section with urlbutton and buttonformat parameters, button format descriptions, and usage examples.
+### Fixed
+- **Button Alignment**: Buttons now properly respect page/container text-align properties for center, left, and right alignment.
 
 ## [3.7.10] - 2026-06-08
 
