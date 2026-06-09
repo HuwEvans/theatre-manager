@@ -1,5 +1,25 @@
 # Theatre Manager - Changelog
 
+## [3.7.19] - 2026-06-09
+
+### Added
+- **Show Landing Page Gutenberg Block**: New block for WordPress block editor providing intuitive interface for `tm_landingpage` shortcode
+  - **Show Selection**: Search for shows by name or select current show
+  - **Field Management**: Check/uncheck fields with drag-to-reorder capability to customize display order
+  - **Live Configuration**: Real-time preview of generated shortcode and configuration summary
+  - **All 14 Fields Supported**: Access all available fields (Show Name, Image, Author, Director, Producer, Stage Manager, Synopsis, Dates, Ticket URL, Cast, Cast with Photos, Venue)
+  - **Cast Grid Options**: Configure 1-6 responsive columns for cast grid layout
+  - **Ticket Button Styling**: Choose from 9 button style formats (Default, Modern, Minimal, Outline, Gradient, Prominent, Success, Ghost, Glass)
+  - **REST API Integration**: Automatic REST API support for show search functionality
+  - **Comprehensive Documentation**: Included README with features, usage guide, and troubleshooting
+
+### Technical Details
+- Block Name: `theatre-manager/landingpage`
+- Location: `blocks/tm-landingpage-block/`
+- Files: `index.js` (React component), `editor.scss` (styles), `block.json` (metadata)
+- PHP Handler: `includes/blocks.php` - Registers block and enables REST API
+- Default Configuration: All fields enabled in recommended order
+
 ## [3.7.18] - 2026-06-08
 
 ### Documentation

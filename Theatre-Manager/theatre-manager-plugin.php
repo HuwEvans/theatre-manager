@@ -3,7 +3,7 @@
  * Plugin Name: Theatre Manager
  * Plugin URI: https://miltonplayers.com/plugin
  * Description: Manage theatre-related content including board members, shows, and more.
- * Version: 3.7.18
+ * Version: 3.7.19
  * Requires at least: 6.8.2
  * Requires PHP: 
  * Author: Huw Evans
@@ -19,7 +19,7 @@ define('TM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('TM_PLUGIN_URL', plugin_dir_url(__FILE__));
 // Public version constant used by other plugins
 if ( ! defined('THEATRE_MANAGER_VERSION') ) {
-    define('THEATRE_MANAGER_VERSION', '3.7.18');
+    define('THEATRE_MANAGER_VERSION', '3.7.19');
 }
 
 // Include core files
@@ -38,6 +38,10 @@ foreach (glob(TM_PLUGIN_DIR . 'cpt/*.php') as $cpt_file) {
 foreach (glob(TM_PLUGIN_DIR . 'includes/shortcodes/*.php') as $shortcode_file) {
     require_once $shortcode_file;
 }
+
+// Load Gutenberg Blocks
+require_once TM_PLUGIN_DIR . 'includes/blocks.php';
+
 // Script and style enqueuing is handled in includes/functions.php
 
 

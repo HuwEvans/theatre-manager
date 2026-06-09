@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 3.7.19
+Show Landing Page Gutenberg Block added.
+- New Gutenberg block for tm_landingpage shortcode in block editor
+- Show search: Search for shows by name or select current show
+- Field management: Check/uncheck and drag-to-reorder all 14 fields
+- Live configuration preview with shortcode display
+- Cast grid options: 1-6 responsive columns
+- Ticket button styling: 9 button format options
+- Real-time summary showing selected show, fields, and options
+- Comprehensive block documentation and README
+- Automatic REST API support for show search
+- Default configuration: All fields enabled in recommended order
+
 ## Version 3.7.18
 Comprehensive tm_landingpage shortcode requirements documentation.
 - Created TM_LANDINGPAGE_REQUIREMENTS.md with complete specification
