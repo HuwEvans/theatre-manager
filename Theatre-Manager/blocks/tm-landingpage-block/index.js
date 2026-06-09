@@ -74,25 +74,42 @@
             const [filteredShows, setFilteredShows] = useState([]);
             const [showResults, setShowResults] = useState(false);
             const [draggedField, setDraggedField] = useState(null);
+            const [fetchError, setFetchError] = useState(null);
 
             useEffect(() => {
                 setLoading(true);
+                setFetchError(null);
                 fetch('/wp-json/wp/v2/show?per_page=100')
-                    .then(res => res.json())
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error(`HTTP error! status: ${res.status}`);
+                        }
+                        return res.json();
+                    })
                     .then(data => {
                         if (Array.isArray(data)) {
                             setShows(data);
+                            setFetchError(null);
+                        } else if (data.code === 'rest_no_route') {
+                            setFetchError('Show REST endpoint not available. Make sure show CPT has show_in_rest enabled.');
+                            setShows([]);
                         }
                         setLoading(false);
                     })
-                    .catch(() => setLoading(false));
+                    .catch(error => {
+                        console.error('Error fetching shows:', error);
+                        setFetchError(`Error loading shows: ${error.message}`);
+                        setShows([]);
+                        setLoading(false);
+                    });
             }, []);
 
             useEffect(() => {
-                if (searchTerm) {
-                    const filtered = shows.filter(show =>
-                        show.title.rendered.toLowerCase().includes(searchTerm.toLowerCase())
-                    );
+                if (searchTerm && shows.length > 0) {
+                    const filtered = shows.filter(show => {
+                        const title = show.title?.rendered || show.title || '';
+                        return title.toLowerCase().includes(searchTerm.toLowerCase());
+                    });
                     setFilteredShows(filtered);
                     setShowResults(true);
                 } else {
@@ -128,6 +145,17 @@
                 el(InspectorControls, null,
                     el(PanelBody, { title: 'Show Selection', initialOpen: true },
                         el('div', { className: 'tm-show-search-wrapper' },
+                            fetchError && el('div', {
+                                style: {
+                                    padding: '10px',
+                                    background: '#fee',
+                                    border: '1px solid #fcc',
+                                    borderRadius: '4px',
+                                    color: '#c33',
+                                    fontSize: '12px',
+                                    marginBottom: '12px'
+                                }
+                            }, `Error: ${fetchError}`),
                             el(TextControl, {
                                 label: 'Search Show',
                                 value: searchTerm,
@@ -135,15 +163,34 @@
                                 placeholder: 'Type show name...'
                             }),
                             loading && el(Spinner),
+                            !fetchError && shows.length === 0 && !loading && el('div', {
+                                style: {
+                                    padding: '10px',
+                                    background: '#f5f5f5',
+                                    borderRadius: '4px',
+                                    color: '#666',
+                                    fontSize: '12px'
+                                }
+                            }, 'No shows found. Create some shows in the admin panel.'),
                             showResults && filteredShows.length > 0 && el('div', { className: 'tm-show-results' },
-                                filteredShows.slice(0, 5).map(show =>
-                                    el('div', {
+                                filteredShows.slice(0, 5).map(show => {
+                                    const showTitle = show.title?.rendered || show.title || 'Untitled';
+                                    return el('div', {
                                         key: show.id,
                                         className: 'tm-show-result-item',
-                                        onClick: () => selectShow(show.id, show.title.rendered)
-                                    }, show.title.rendered)
-                                )
+                                        onClick: () => selectShow(show.id, showTitle)
+                                    }, showTitle);
+                                })
                             ),
+                            showResults && filteredShows.length === 0 && el('div', {
+                                style: {
+                                    padding: '10px',
+                                    background: '#f5f5f5',
+                                    borderRadius: '4px',
+                                    color: '#666',
+                                    fontSize: '12px'
+                                }
+                            }, 'No shows match your search.'),
                             el(Button, {
                                 isSecondary: true,
                                 onClick: () => selectShow('current', 'Current Show'),
@@ -291,6 +338,17 @@
                             }
                         },
                             el('label', { style: { fontSize: '11px', color: '#666', fontWeight: '600', display: 'block', marginBottom: '8px' } }, 'SHOW SELECTION'),
+                            fetchError && el('div', {
+                                style: {
+                                    padding: '12px',
+                                    background: '#fee',
+                                    border: '1px solid #fcc',
+                                    borderRadius: '4px',
+                                    color: '#c33',
+                                    fontSize: '12px',
+                                    marginBottom: '12px'
+                                }
+                            }, `Error: ${fetchError}`),
                             attributes.showId ? 
                                 el('div', null,
                                     el('div', { style: { fontSize: '16px', fontWeight: '600', color: attributes.headingColor, marginBottom: '8px' } }, attributes.showTitle),
@@ -304,7 +362,20 @@
                                 )
                                 :
                                 el('div', null,
-                                    el('div', { style: { fontSize: '13px', color: '#666', marginBottom: '12px' } }, 'Click below to select a show:'),
+                                    loading && el('div', {
+                                        style: {
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '12px',
+                                            background: '#f5f5f5',
+                                            borderRadius: '4px',
+                                            color: '#666',
+                                            fontSize: '13px',
+                                            marginBottom: '12px'
+                                        }
+                                    }, 'Loading shows...', el(Spinner)),
+                                    !loading && el('div', { style: { fontSize: '13px', color: '#666', marginBottom: '12px' } }, 'Click below to select a show:'),
                                     el('div', null,
                                         el(TextControl, {
                                             label: '',
@@ -314,7 +385,6 @@
                                             style: { margin: '0' }
                                         })
                                     ),
-                                    loading && el(Spinner),
                                     showResults && filteredShows.length > 0 && el('div', { 
                                         style: { 
                                             marginTop: '8px',
@@ -325,8 +395,9 @@
                                             overflow: 'auto'
                                         } 
                                     },
-                                        filteredShows.slice(0, 5).map(show =>
-                                            el('div', {
+                                        filteredShows.slice(0, 5).map(show => {
+                                            const showTitle = show.title?.rendered || show.title || 'Untitled';
+                                            return el('div', {
                                                 key: show.id,
                                                 style: {
                                                     padding: '10px 12px',
@@ -337,10 +408,30 @@
                                                 },
                                                 onMouseEnter: (e) => e.target.style.backgroundColor = `${attributes.accentColor}22`,
                                                 onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
-                                                onClick: () => selectShow(show.id, show.title.rendered)
-                                            }, show.title.rendered)
-                                        )
+                                                onClick: () => selectShow(show.id, showTitle)
+                                            }, showTitle);
+                                        })
                                     ),
+                                    showResults && filteredShows.length === 0 && el('div', {
+                                        style: {
+                                            marginTop: '8px',
+                                            padding: '10px',
+                                            background: '#f5f5f5',
+                                            borderRadius: '4px',
+                                            color: '#666',
+                                            fontSize: '12px'
+                                        }
+                                    }, 'No shows match your search.'),
+                                    !searchTerm && shows.length === 0 && !loading && el('div', {
+                                        style: {
+                                            marginTop: '8px',
+                                            padding: '10px',
+                                            background: '#f5f5f5',
+                                            borderRadius: '4px',
+                                            color: '#666',
+                                            fontSize: '12px'
+                                        }
+                                    }, 'No shows available. Create some in the admin panel.'),
                                     el(Button, {
                                         isPrimary: true,
                                         onClick: () => selectShow('current', 'Current Show'),
