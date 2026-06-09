@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 3.8.2
+Show search error handling and user feedback improvements.
+- Fixed preview search errors with robust error handling
+- Handle both REST API response formats
+- Add graceful fallback for missing show_in_rest
+- Display helpful error messages and status indicators
+- Add loading indicator while fetching shows
+- Add "no shows" and "no results" messages
+- Prevent undefined property access errors
+- Log errors to console for debugging
+
 ## Version 3.8.1
 Enhanced Landing Page Block with interactive show selection and color customization.
 - Interactive show search in block preview with real-time results

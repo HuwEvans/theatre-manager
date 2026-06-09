@@ -1,5 +1,20 @@
 # Theatre Manager - Changelog
 
+## [3.8.2] - 2026-06-09
+
+### Fixed
+- **Show Search Error Handling**: Fixed preview search functionality with comprehensive error handling
+  - Added robust error handling for REST API fetch with proper error states
+  - Handle both REST API response formats (title.rendered and title field)
+  - Add graceful fallback if show CPT doesn't have show_in_rest enabled
+  - Display error messages in both sidebar and preview with helpful text
+  - Add loading indicator with "Loading shows..." message while fetching
+  - Add "no shows available" message when list is empty
+  - Add "no results" message when search finds nothing
+  - Prevent undefined property access errors (show.title.rendered)
+  - Log detailed error messages to browser console for debugging
+- All search interactions now provide clear feedback to user
+
 ## [3.8.1] - 2026-06-09
 
 ### Added
