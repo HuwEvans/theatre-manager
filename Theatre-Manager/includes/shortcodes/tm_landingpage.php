@@ -133,11 +133,15 @@ function tm_get_current_show() {
 function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true, $atts = array()) {
     $output = '';
     
+    // Extract color attributes if available
+    $heading_color = isset($atts['heading_color']) ? sanitize_hex_color($atts['heading_color']) ?: '#1a1a1a' : '#1a1a1a';
+    $accent_color = isset($atts['accent_color']) ? sanitize_hex_color($atts['accent_color']) ?: '#0073aa' : '#0073aa';
+    
     switch ($field_name) {
         case 'show_name':
             $title = get_the_title($show_id);
             if ($title) {
-                $output .= esc_html($title);
+                $output .= '<h2 style="color: ' . esc_attr($heading_color) . '; margin: 0 0 10px 0;">' . esc_html($title) . '</h2>';
             }
             break;
 
@@ -454,7 +458,11 @@ function tm_shortcode_landingpage($atts) {
         'hard_breaks' => 'true',
         'castcols' => '3',
         'urlbutton' => 'false',
-        'buttonformat' => 'default'
+        'buttonformat' => 'default',
+        'text_color' => '#333333',
+        'bg_color' => '#ffffff',
+        'accent_color' => '#0073aa',
+        'heading_color' => '#1a1a1a'
     ], $atts, 'tm_landingpage');
 
     // Determine which show to display
@@ -487,10 +495,23 @@ function tm_shortcode_landingpage($atts) {
     // Parse hard_breaks parameter
     $hard_breaks = strtolower($atts['hard_breaks']) === 'true' || $atts['hard_breaks'] === '1';
 
+    // Sanitize color parameters
+    $text_color = sanitize_hex_color($atts['text_color']) ?: '#333333';
+    $bg_color = sanitize_hex_color($atts['bg_color']) ?: '#ffffff';
+    $accent_color = sanitize_hex_color($atts['accent_color']) ?: '#0073aa';
+    $heading_color = sanitize_hex_color($atts['heading_color']) ?: '#1a1a1a';
+
     // Render the landing page
     if ($hard_breaks) {
         // With hard breaks: wrap in divs for styling control
-        $output = '<div class="tm-landingpage-wrapper tm-landingpage">';
+        $style = sprintf(
+            'style="color: %s; background-color: %s; --tm-accent-color: %s; --tm-heading-color: %s;"',
+            esc_attr($text_color),
+            esc_attr($bg_color),
+            esc_attr($accent_color),
+            esc_attr($heading_color)
+        );
+        $output = '<div class="tm-landingpage-wrapper tm-landingpage" ' . $style . '>';
 
         foreach ($field_list as $field) {
             $field = sanitize_key($field);

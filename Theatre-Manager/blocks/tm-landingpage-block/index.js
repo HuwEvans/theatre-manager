@@ -10,7 +10,7 @@
     const { registerBlockType } = wp.blocks;
     const { InspectorControls, BlockControls } = wp.blockEditor;
     const { 
-        PanelBody, TextControl, CheckboxControl, SelectControl, Button, Spinner
+        PanelBody, TextControl, CheckboxControl, SelectControl, Button, Spinner, ColorPalette
     } = wp.components;
     const { useState, useEffect } = wp.element;
 
@@ -59,7 +59,11 @@
             castcols: { type: 'number', default: 3 },
             urlbutton: { type: 'boolean', default: true },
             buttonformat: { type: 'string', default: 'default' },
-            searchValue: { type: 'string', default: '' }
+            searchValue: { type: 'string', default: '' },
+            textColor: { type: 'string', default: '#333333' },
+            backgroundColor: { type: 'string', default: '#ffffff' },
+            accentColor: { type: 'string', default: '#0073aa' },
+            headingColor: { type: 'string', default: '#1a1a1a' }
         },
 
         edit: function(props) {
@@ -118,7 +122,7 @@
                 setAttributes({ fieldList: newFields });
             };
 
-            const shortcodeText = `[tm_landingpage show_id="${attributes.showId}" field_list="${(attributes.fieldList || []).join(',')}" castcols="${attributes.castcols}" urlbutton="${attributes.urlbutton ? 'true' : 'false'}" buttonformat="${attributes.buttonformat}"]`;
+            const shortcodeText = `[tm_landingpage show_id="${attributes.showId}" field_list="${(attributes.fieldList || []).join(',')}" castcols="${attributes.castcols}" urlbutton="${attributes.urlbutton ? 'true' : 'false'}" buttonformat="${attributes.buttonformat}" text_color="${attributes.textColor}" bg_color="${attributes.backgroundColor}" accent_color="${attributes.accentColor}" heading_color="${attributes.headingColor}"]`;
 
             return el('div', { className: 'tm-landingpage-block-editor' },
                 el(InspectorControls, null,
@@ -150,6 +154,67 @@
                             style: { marginTop: '10px', padding: '8px', background: '#f0f0f0', borderRadius: '4px' }
                         },
                             el('strong', null, 'Selected: '), attributes.showTitle
+                        )
+                    ),
+                    el(PanelBody, { title: 'Color Settings', initialOpen: false },
+                        el('div', null,
+                            el('p', { style: { fontSize: '12px', marginBottom: '12px' } }, 'Choose colors for the landing page display:'),
+                            el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '13px' } }, 'Heading Color'),
+                                el(ColorPalette, {
+                                    colors: [
+                                        { name: 'Black', color: '#1a1a1a' },
+                                        { name: 'Dark Gray', color: '#333333' },
+                                        { name: 'Blue', color: '#0073aa' },
+                                        { name: 'Purple', color: '#6f2da8' },
+                                        { name: 'Dark Green', color: '#174e3e' }
+                                    ],
+                                    value: attributes.headingColor,
+                                    onChange: (color) => setAttributes({ headingColor: color })
+                                })
+                            ),
+                            el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '13px' } }, 'Text Color'),
+                                el(ColorPalette, {
+                                    colors: [
+                                        { name: 'Black', color: '#000000' },
+                                        { name: 'Dark Gray', color: '#333333' },
+                                        { name: 'Gray', color: '#666666' },
+                                        { name: 'Navy Blue', color: '#0a3a4a' },
+                                        { name: 'Dark Brown', color: '#3d2817' }
+                                    ],
+                                    value: attributes.textColor,
+                                    onChange: (color) => setAttributes({ textColor: color })
+                                })
+                            ),
+                            el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '13px' } }, 'Accent Color (Links & Highlights)'),
+                                el(ColorPalette, {
+                                    colors: [
+                                        { name: 'Blue', color: '#0073aa' },
+                                        { name: 'Green', color: '#00a32a' },
+                                        { name: 'Purple', color: '#6f2da8' },
+                                        { name: 'Orange', color: '#d97f3a' },
+                                        { name: 'Red', color: '#c63d43' }
+                                    ],
+                                    value: attributes.accentColor,
+                                    onChange: (color) => setAttributes({ accentColor: color })
+                                })
+                            ),
+                            el('div', { style: { marginBottom: '0' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '13px' } }, 'Background Color'),
+                                el(ColorPalette, {
+                                    colors: [
+                                        { name: 'White', color: '#ffffff' },
+                                        { name: 'Off-White', color: '#f9f9f9' },
+                                        { name: 'Light Gray', color: '#f5f5f5' },
+                                        { name: 'Cream', color: '#faf7f2' },
+                                        { name: 'Light Blue', color: '#f0f7ff' }
+                                    ],
+                                    value: attributes.backgroundColor,
+                                    onChange: (color) => setAttributes({ backgroundColor: color })
+                                })
+                            )
                         )
                     ),
                     el(PanelBody, { title: 'Field Selection', initialOpen: true },
@@ -208,10 +273,83 @@
                 ),
                 el('div', { className: 'tm-landingpage-block-preview' },
                     el('div', {
-                        style: { padding: '20px', background: '#fff', border: '1px solid #e0e0e0', borderRadius: '4px' }
+                        style: { 
+                            padding: '20px', 
+                            background: attributes.backgroundColor, 
+                            border: `2px solid ${attributes.accentColor}`, 
+                            borderRadius: '4px',
+                            color: attributes.textColor
+                        }
                     },
-                        el('h3', { style: { marginTop: 0 } }, 'Landing Page Preview'),
-                        el('p', { style: { fontSize: '13px', color: '#666', marginBottom: '15px' } }, 'Generated shortcode will display all selected fields.'),
+                        el('div', {
+                            style: {
+                                marginBottom: '20px',
+                                padding: '15px',
+                                background: 'rgba(0,0,0,0.03)',
+                                borderLeft: `4px solid ${attributes.accentColor}`,
+                                borderRadius: '4px'
+                            }
+                        },
+                            el('label', { style: { fontSize: '11px', color: '#666', fontWeight: '600', display: 'block', marginBottom: '8px' } }, 'SHOW SELECTION'),
+                            attributes.showId ? 
+                                el('div', null,
+                                    el('div', { style: { fontSize: '16px', fontWeight: '600', color: attributes.headingColor, marginBottom: '8px' } }, attributes.showTitle),
+                                    el('div', null,
+                                        el(Button, {
+                                            isSecondary: true,
+                                            onClick: () => setSearchTerm(''),
+                                            style: { marginTop: '8px' }
+                                        }, 'Change Show')
+                                    )
+                                )
+                                :
+                                el('div', null,
+                                    el('div', { style: { fontSize: '13px', color: '#666', marginBottom: '12px' } }, 'Click below to select a show:'),
+                                    el('div', null,
+                                        el(TextControl, {
+                                            label: '',
+                                            value: searchTerm,
+                                            onChange: (value) => setSearchTerm(value),
+                                            placeholder: 'Type show name...',
+                                            style: { margin: '0' }
+                                        })
+                                    ),
+                                    loading && el(Spinner),
+                                    showResults && filteredShows.length > 0 && el('div', { 
+                                        style: { 
+                                            marginTop: '8px',
+                                            background: '#fff',
+                                            border: `1px solid ${attributes.accentColor}`,
+                                            borderRadius: '4px',
+                                            maxHeight: '150px',
+                                            overflow: 'auto'
+                                        } 
+                                    },
+                                        filteredShows.slice(0, 5).map(show =>
+                                            el('div', {
+                                                key: show.id,
+                                                style: {
+                                                    padding: '10px 12px',
+                                                    borderBottom: '1px solid #eee',
+                                                    cursor: 'pointer',
+                                                    fontSize: '13px',
+                                                    transition: 'background-color 0.2s'
+                                                },
+                                                onMouseEnter: (e) => e.target.style.backgroundColor = `${attributes.accentColor}22`,
+                                                onMouseLeave: (e) => e.target.style.backgroundColor = 'transparent',
+                                                onClick: () => selectShow(show.id, show.title.rendered)
+                                            }, show.title.rendered)
+                                        )
+                                    ),
+                                    el(Button, {
+                                        isPrimary: true,
+                                        onClick: () => selectShow('current', 'Current Show'),
+                                        style: { marginTop: '12px' }
+                                    }, 'Use Current Show')
+                                )
+                        ),
+                        el('h3', { style: { marginTop: '20px', marginBottom: '0', color: attributes.headingColor } }, 'Preview Settings'),
+                        el('p', { style: { fontSize: '13px', color: '#666', marginBottom: '15px' } }, 'Generated shortcode will display all selected fields with your color choices.'),
                         el('div', {
                             style: {
                                 background: '#f8f8f8',
@@ -220,22 +358,40 @@
                                 fontFamily: 'monospace',
                                 fontSize: '11px',
                                 overflow: 'auto',
-                                maxHeight: '100px'
+                                maxHeight: '120px',
+                                color: '#333',
+                                border: '1px solid #ddd'
                             }
                         }, shortcodeText),
                         el('div', {
                             style: {
                                 marginTop: '15px',
                                 padding: '12px',
-                                background: '#e7f3ff',
-                                borderLeft: '4px solid #0073aa',
-                                borderRadius: '4px'
+                                background: `${attributes.accentColor}15`,
+                                borderLeft: `4px solid ${attributes.accentColor}`,
+                                borderRadius: '4px',
+                                color: attributes.textColor
                             }
                         },
-                            el('div', null, el('strong', null, 'Selected Show: '), attributes.showTitle),
-                            el('div', null, el('strong', null, 'Selected Fields: '), (attributes.fieldList || []).length, ' of ', AVAILABLE_FIELDS.length),
-                            attributes.fieldList?.includes('castwithbio') && el('div', null, el('strong', null, 'Cast Columns: '), attributes.castcols),
-                            attributes.fieldList?.includes('ticket_url') && el('div', null, el('strong', null, 'Ticket Button: '), attributes.urlbutton ? `Yes (${attributes.buttonformat})` : 'No')
+                            el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Selected Show: '), attributes.showTitle),
+                            el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Selected Fields: '), (attributes.fieldList || []).length, ' of ', AVAILABLE_FIELDS.length),
+                            attributes.fieldList?.includes('castwithbio') && el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Cast Columns: '), attributes.castcols),
+                            attributes.fieldList?.includes('ticket_url') && el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Ticket Button: '), attributes.urlbutton ? `Yes (${attributes.buttonformat})` : 'No'),
+                            el('div', { style: { marginTop: '10px', paddingTop: '10px', borderTop: `1px solid ${attributes.accentColor}33` } },
+                                el('div', { style: { fontSize: '12px', fontWeight: '600', marginBottom: '6px', color: attributes.headingColor } }, 'Color Scheme:'),
+                                el('div', { style: { display: 'flex', gap: '8px', fontSize: '11px' } },
+                                    el('div', null, el('strong', null, 'Heading:')), 
+                                    el('span', { style: { display: 'inline-block', width: '16px', height: '16px', background: attributes.headingColor, borderRadius: '2px', border: '1px solid #ccc' } })
+                                ),
+                                el('div', { style: { display: 'flex', gap: '8px', fontSize: '11px', marginTop: '4px' } },
+                                    el('div', null, el('strong', null, 'Text:')), 
+                                    el('span', { style: { display: 'inline-block', width: '16px', height: '16px', background: attributes.textColor, borderRadius: '2px', border: '1px solid #ccc' } })
+                                ),
+                                el('div', { style: { display: 'flex', gap: '8px', fontSize: '11px', marginTop: '4px' } },
+                                    el('div', null, el('strong', null, 'Accent:')), 
+                                    el('span', { style: { display: 'inline-block', width: '16px', height: '16px', background: attributes.accentColor, borderRadius: '2px', border: '1px solid #ccc' } })
+                                )
+                            )
                         )
                     )
                 )
@@ -244,7 +400,7 @@
 
         save: function(props) {
             const { attributes } = props;
-            const shortcode = `[tm_landingpage show_id="${attributes.showId}" field_list="${(attributes.fieldList || []).join(',')}" castcols="${attributes.castcols}" urlbutton="${attributes.urlbutton ? 'true' : 'false'}" buttonformat="${attributes.buttonformat}"]`;
+            const shortcode = `[tm_landingpage show_id="${attributes.showId}" field_list="${(attributes.fieldList || []).join(',')}" castcols="${attributes.castcols}" urlbutton="${attributes.urlbutton ? 'true' : 'false'}" buttonformat="${attributes.buttonformat}" text_color="${attributes.textColor}" bg_color="${attributes.backgroundColor}" accent_color="${attributes.accentColor}" heading_color="${attributes.headingColor}"]`;
             return el('div', { dangerouslySetInnerHTML: { __html: shortcode } });
         }
     });
