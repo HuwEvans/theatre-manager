@@ -45,6 +45,104 @@
         { label: 'Glass', value: 'glass' }
     ];
 
+    const CAST_IMAGE_SIZES = [
+        { label: 'Small', value: 'small' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Large', value: 'large' }
+    ];
+
+    const TEXT_ALIGN_OPTIONS = [
+        { label: 'Inherit', value: 'inherit' },
+        { label: 'Left', value: 'left' },
+        { label: 'Center', value: 'center' },
+        { label: 'Right', value: 'right' },
+        { label: 'Justify', value: 'justify' }
+    ];
+
+    const FONT_FAMILY_OPTIONS = [
+        { label: 'Inherit Theme Font', value: 'inherit' },
+        { label: 'System UI', value: 'system' },
+        { label: 'Sans Serif', value: 'sans' },
+        { label: 'Serif', value: 'serif' },
+        { label: 'Georgia', value: 'georgia' },
+        { label: 'Times New Roman', value: 'times' },
+        { label: 'Trebuchet MS', value: 'trebuchet' }
+    ];
+
+    const TEXT_SIZE_OPTIONS = [
+        { label: 'Inherit', value: 'inherit' },
+        { label: 'Small', value: 'small' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Large', value: 'large' },
+        { label: 'Extra Large', value: 'xlarge' }
+    ];
+
+    const FONT_FAMILY_PREVIEW_STYLE = {
+        inherit: 'inherit',
+        system: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        sans: 'Arial, Helvetica, sans-serif',
+        serif: 'Georgia, "Times New Roman", serif',
+        georgia: 'Georgia, serif',
+        times: '"Times New Roman", Times, serif',
+        trebuchet: '"Trebuchet MS", Helvetica, sans-serif'
+    };
+
+    const TEXT_SIZE_PREVIEW_STYLE = {
+        inherit: 'inherit',
+        small: '0.9rem',
+        medium: '1rem',
+        large: '1.15rem',
+        xlarge: '1.3rem'
+    };
+
+    const decodeEntities = (value) => {
+        if (typeof value !== 'string') {
+            return '';
+        }
+
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = value;
+        return textarea.value;
+    };
+
+    const getShowTitleText = (show) => {
+        const rawTitle = show && show.title ? (show.title.rendered || show.title) : '';
+        const titleText = decodeEntities(String(rawTitle || '')).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
+        if (titleText) {
+            return titleText;
+        }
+
+        if (show && typeof show.slug === 'string' && show.slug.trim()) {
+            return show.slug
+                .replace(/[-_]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .replace(/\b\w/g, (char) => char.toUpperCase());
+        }
+
+        return '';
+    };
+
+    const normalizeSearchText = (value) => decodeEntities(String(value || ''))
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/[-_]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+
+    const buildShowSearchText = (show) => {
+        const parts = [
+            getShowTitleText(show),
+            show && typeof show.slug === 'string' ? show.slug : '',
+            show && show.guid && typeof show.guid.rendered === 'string' ? show.guid.rendered : '',
+            show && show.acf && typeof show.acf.show_name === 'string' ? show.acf.show_name : '',
+            show && show.meta && typeof show.meta.show_name === 'string' ? show.meta.show_name : ''
+        ];
+
+        return normalizeSearchText(parts.join(' '));
+    };
+
     registerBlockType('theatre-manager/landingpage', {
         title: 'Show Landing Page',
         description: 'Display comprehensive information about a theatre show',
@@ -57,9 +155,13 @@
             showTitle: { type: 'string', default: 'Current Show' },
             fieldList: { type: 'array', default: DEFAULT_FIELDS },
             castcols: { type: 'number', default: 3 },
+            castImageSize: { type: 'string', default: 'large' },
             urlbutton: { type: 'boolean', default: true },
             buttonformat: { type: 'string', default: 'default' },
             searchValue: { type: 'string', default: '' },
+            textAlign: { type: 'string', default: 'inherit' },
+            fontFamily: { type: 'string', default: 'inherit' },
+            textSize: { type: 'string', default: 'inherit' },
             textColor: { type: 'string', default: '#333333' },
             backgroundColor: { type: 'string', default: '#ffffff' },
             accentColor: { type: 'string', default: '#0073aa' },
@@ -77,48 +179,94 @@
             const [fetchError, setFetchError] = useState(null);
 
             useEffect(() => {
+                let isMounted = true;
+
                 setLoading(true);
                 setFetchError(null);
-                fetch('/wp-json/wp/v2/show?per_page=100')
-                    .then(res => {
-                        if (!res.ok) {
-                            throw new Error(`HTTP error! status: ${res.status}`);
+
+                const fetchAllShows = async () => {
+                    try {
+                        const firstResponse = await fetch('/wp-json/wp/v2/show?per_page=100&page=1');
+                        if (!firstResponse.ok) {
+                            throw new Error(`HTTP error! status: ${firstResponse.status}`);
                         }
-                        return res.json();
-                    })
-                    .then(data => {
-                        if (Array.isArray(data)) {
-                            setShows(data);
+
+                        const firstData = await firstResponse.json();
+                        if (!Array.isArray(firstData)) {
+                            if (firstData && firstData.code === 'rest_no_route') {
+                                throw new Error('Show REST endpoint not available. Make sure show CPT has show_in_rest enabled.');
+                            }
+                            throw new Error('Unexpected response while loading shows.');
+                        }
+
+                        const totalPages = parseInt(firstResponse.headers.get('X-WP-TotalPages') || '1', 10);
+                        let allShows = [...firstData];
+
+                        if (totalPages > 1) {
+                            const pageRequests = [];
+                            for (let page = 2; page <= totalPages; page++) {
+                                pageRequests.push(fetch(`/wp-json/wp/v2/show?per_page=100&page=${page}`));
+                            }
+
+                            const pageResponses = await Promise.all(pageRequests);
+                            for (const response of pageResponses) {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+
+                                const pageData = await response.json();
+                                if (Array.isArray(pageData)) {
+                                    allShows = allShows.concat(pageData);
+                                }
+                            }
+                        }
+
+                        if (isMounted) {
+                            setShows(allShows);
                             setFetchError(null);
-                        } else if (data.code === 'rest_no_route') {
-                            setFetchError('Show REST endpoint not available. Make sure show CPT has show_in_rest enabled.');
-                            setShows([]);
+                            setLoading(false);
                         }
-                        setLoading(false);
-                    })
-                    .catch(error => {
+                    } catch (error) {
                         console.error('Error fetching shows:', error);
-                        setFetchError(`Error loading shows: ${error.message}`);
-                        setShows([]);
-                        setLoading(false);
-                    });
+                        if (isMounted) {
+                            setFetchError(`Error loading shows: ${error.message}`);
+                            setShows([]);
+                            setLoading(false);
+                        }
+                    }
+                };
+
+                fetchAllShows();
+
+                return () => {
+                    isMounted = false;
+                };
             }, []);
 
             useEffect(() => {
-                if (searchTerm && shows.length > 0) {
+                const normalizedSearch = normalizeSearchText(searchTerm);
+
+                if (normalizedSearch && shows.length > 0) {
                     const filtered = shows.filter(show => {
-                        const title = show.title?.rendered || show.title || '';
-                        return title.toLowerCase().includes(searchTerm.toLowerCase());
+                        const searchableText = buildShowSearchText(show);
+                        return searchableText.includes(normalizedSearch);
                     });
                     setFilteredShows(filtered);
                     setShowResults(true);
                 } else {
+                    setFilteredShows([]);
                     setShowResults(false);
                 }
             }, [searchTerm, shows]);
 
             const selectShow = (showId, showTitle) => {
                 setAttributes({ showId: showId.toString(), showTitle });
+                setSearchTerm('');
+                setShowResults(false);
+            };
+
+            const startShowSearch = () => {
+                setAttributes({ showId: '', showTitle: '' });
                 setSearchTerm('');
                 setShowResults(false);
             };
@@ -139,7 +287,7 @@
                 setAttributes({ fieldList: newFields });
             };
 
-            const shortcodeText = `[tm_landingpage show_id="${attributes.showId}" field_list="${(attributes.fieldList || []).join(',')}" castcols="${attributes.castcols}" urlbutton="${attributes.urlbutton ? 'true' : 'false'}" buttonformat="${attributes.buttonformat}" text_color="${attributes.textColor}" bg_color="${attributes.backgroundColor}" accent_color="${attributes.accentColor}" heading_color="${attributes.headingColor}"]`;
+            const shortcodeText = `[tm_landingpage show_id="${attributes.showId}" field_list="${(attributes.fieldList || []).join(',')}" castcols="${attributes.castcols}" cast_image_size="${attributes.castImageSize}" urlbutton="${attributes.urlbutton ? 'true' : 'false'}" buttonformat="${attributes.buttonformat}" text_align="${attributes.textAlign}" font_family="${attributes.fontFamily}" text_size="${attributes.textSize}" text_color="${attributes.textColor}" bg_color="${attributes.backgroundColor}" accent_color="${attributes.accentColor}" heading_color="${attributes.headingColor}"]`;
 
             return el('div', { className: 'tm-landingpage-block-editor' },
                 el(InspectorControls, null,
@@ -174,7 +322,7 @@
                             }, 'No shows found. Create some shows in the admin panel.'),
                             showResults && filteredShows.length > 0 && el('div', { className: 'tm-show-results' },
                                 filteredShows.slice(0, 5).map(show => {
-                                    const showTitle = show.title?.rendered || show.title || 'Untitled';
+                                    const showTitle = getShowTitleText(show) || 'Untitled';
                                     return el('div', {
                                         key: show.id,
                                         className: 'tm-show-result-item',
@@ -264,6 +412,26 @@
                             )
                         )
                     ),
+                    el(PanelBody, { title: 'Typography', initialOpen: false },
+                        el(SelectControl, {
+                            label: 'Text Alignment',
+                            value: attributes.textAlign,
+                            options: TEXT_ALIGN_OPTIONS,
+                            onChange: (value) => setAttributes({ textAlign: value })
+                        }),
+                        el(SelectControl, {
+                            label: 'Font Family',
+                            value: attributes.fontFamily,
+                            options: FONT_FAMILY_OPTIONS,
+                            onChange: (value) => setAttributes({ fontFamily: value })
+                        }),
+                        el(SelectControl, {
+                            label: 'Text Size',
+                            value: attributes.textSize,
+                            options: TEXT_SIZE_OPTIONS,
+                            onChange: (value) => setAttributes({ textSize: value })
+                        })
+                    ),
                     el(PanelBody, { title: 'Field Selection', initialOpen: true },
                         el('div', { className: 'tm-field-selector' },
                             el('p', { style: { fontSize: '12px', color: '#666' } }, 'Check fields to include. Drag to reorder.'),
@@ -302,6 +470,13 @@
                             value: attributes.castcols,
                             onChange: (value) => setAttributes({ castcols: parseInt(value) || 3 }),
                             help: 'Number of columns for cast grid (1-6)'
+                        }),
+                        el(SelectControl, {
+                            label: 'Cast Image Size',
+                            value: attributes.castImageSize,
+                            options: CAST_IMAGE_SIZES,
+                            onChange: (value) => setAttributes({ castImageSize: value }),
+                            help: 'Large = 100% width, Medium = 75%, Small = 50% within each cast column.'
                         })
                     ),
                     attributes.fieldList?.includes('ticket_url') && el(PanelBody, { title: 'Ticket Button Options', initialOpen: false },
@@ -325,7 +500,10 @@
                             background: attributes.backgroundColor, 
                             border: `2px solid ${attributes.accentColor}`, 
                             borderRadius: '4px',
-                            color: attributes.textColor
+                            color: attributes.textColor,
+                            textAlign: attributes.textAlign,
+                            fontFamily: FONT_FAMILY_PREVIEW_STYLE[attributes.fontFamily] || 'inherit',
+                            fontSize: TEXT_SIZE_PREVIEW_STYLE[attributes.textSize] || 'inherit'
                         }
                     },
                         el('div', {
@@ -355,7 +533,7 @@
                                     el('div', null,
                                         el(Button, {
                                             isSecondary: true,
-                                            onClick: () => setSearchTerm(''),
+                                            onClick: startShowSearch,
                                             style: { marginTop: '8px' }
                                         }, 'Change Show')
                                     )
@@ -396,7 +574,7 @@
                                         } 
                                     },
                                         filteredShows.slice(0, 5).map(show => {
-                                            const showTitle = show.title?.rendered || show.title || 'Untitled';
+                                            const showTitle = getShowTitleText(show) || 'Untitled';
                                             return el('div', {
                                                 key: show.id,
                                                 style: {
@@ -467,7 +645,11 @@
                             el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Selected Show: '), attributes.showTitle),
                             el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Selected Fields: '), (attributes.fieldList || []).length, ' of ', AVAILABLE_FIELDS.length),
                             attributes.fieldList?.includes('castwithbio') && el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Cast Columns: '), attributes.castcols),
+                            attributes.fieldList?.includes('castwithbio') && el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Cast Image Size: '), attributes.castImageSize),
                             attributes.fieldList?.includes('ticket_url') && el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Ticket Button: '), attributes.urlbutton ? `Yes (${attributes.buttonformat})` : 'No'),
+                            el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Text Align: '), attributes.textAlign),
+                            el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Font Family: '), attributes.fontFamily),
+                            el('div', null, el('strong', { style: { color: attributes.headingColor } }, 'Text Size: '), attributes.textSize),
                             el('div', { style: { marginTop: '10px', paddingTop: '10px', borderTop: `1px solid ${attributes.accentColor}33` } },
                                 el('div', { style: { fontSize: '12px', fontWeight: '600', marginBottom: '6px', color: attributes.headingColor } }, 'Color Scheme:'),
                                 el('div', { style: { display: 'flex', gap: '8px', fontSize: '11px' } },
@@ -491,7 +673,7 @@
 
         save: function(props) {
             const { attributes } = props;
-            const shortcode = `[tm_landingpage show_id="${attributes.showId}" field_list="${(attributes.fieldList || []).join(',')}" castcols="${attributes.castcols}" urlbutton="${attributes.urlbutton ? 'true' : 'false'}" buttonformat="${attributes.buttonformat}" text_color="${attributes.textColor}" bg_color="${attributes.backgroundColor}" accent_color="${attributes.accentColor}" heading_color="${attributes.headingColor}"]`;
+            const shortcode = `[tm_landingpage show_id="${attributes.showId}" field_list="${(attributes.fieldList || []).join(',')}" castcols="${attributes.castcols}" cast_image_size="${attributes.castImageSize}" urlbutton="${attributes.urlbutton ? 'true' : 'false'}" buttonformat="${attributes.buttonformat}" text_align="${attributes.textAlign}" font_family="${attributes.fontFamily}" text_size="${attributes.textSize}" text_color="${attributes.textColor}" bg_color="${attributes.backgroundColor}" accent_color="${attributes.accentColor}" heading_color="${attributes.headingColor}"]`;
             return el('div', { dangerouslySetInnerHTML: { __html: shortcode } });
         }
     });

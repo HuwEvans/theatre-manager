@@ -159,42 +159,42 @@ function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true,
         case 'author':
             $value = get_post_meta($show_id, '_tm_show_author', true);
             if ($value) {
-                $output .= esc_html($value);
+                $output .= 'Written by: ' . esc_html($value);
             }
             break;
 
         case 'sub_authors':
             $value = get_post_meta($show_id, '_tm_show_sub_authors', true);
             if ($value) {
-                $output .= esc_html($value);
+                $output .= 'Co-Written by: ' . esc_html($value);
             }
             break;
 
         case 'director':
             $value = get_post_meta($show_id, '_tm_show_director', true);
             if ($value) {
-                $output .= esc_html($value);
+                $output .= 'Directed by: ' . esc_html($value);
             }
             break;
 
         case 'associate_director':
             $value = get_post_meta($show_id, '_tm_show_associate_director', true);
             if ($value) {
-                $output .= esc_html($value);
+                $output .= 'Assistant Directed by: ' . esc_html($value);
             }
             break;
 
         case 'producer':
             $value = get_post_meta($show_id, '_tm_show_producer', true);
             if ($value) {
-                $output .= esc_html($value);
+                $output .= 'Produced by: ' . esc_html($value);
             }
             break;
 
         case 'stage_manager':
             $value = get_post_meta($show_id, '_tm_show_stage_manager', true);
             if ($value) {
-                $output .= esc_html($value);
+                $output .= 'Stage managed by: ' . esc_html($value);
             }
             break;
 
@@ -223,18 +223,31 @@ function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true,
             break;
 
         case 'ticket_url':
-            $url = get_post_meta($show_id, '_tm_show_tickets_url', true);
+            $url = trim((string) get_post_meta($show_id, '_tm_show_tickets_url', true));
             if ($url) {
+                if (!preg_match('#^https?://#i', $url)) {
+                    $url = 'https://' . ltrim($url, '/');
+                }
+
+                $url = esc_url_raw($url);
+                if (!$url) {
+                    break;
+                }
+
                 $use_button = strtolower($atts['urlbutton']) === 'true' || $atts['urlbutton'] === '1';
                 if ($use_button && $hard_breaks) {
                     // Display as a button
+                    $allowed_formats = array('default', 'modern', 'minimal', 'outline', 'gradient', 'prominent', 'success', 'ghost', 'glass');
                     $buttonformat = sanitize_key($atts['buttonformat']);
+                    if (!in_array($buttonformat, $allowed_formats, true)) {
+                        $buttonformat = 'default';
+                    }
                     $button_class = 'tm-url-button tm-button-' . esc_attr($buttonformat);
-                    $output .= '<a href="' . esc_url($url) . '" class="' . $button_class . '" target="_blank">Get Tickets</a>';
+                    $output .= '<a href="' . esc_url($url) . '" class="' . $button_class . '" target="_blank" rel="noopener noreferrer">Get Tickets</a>';
                 } else {
                     // Display as regular link
                     if ($hard_breaks) {
-                        $output .= '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($url) . '</a>';
+                        $output .= '<a href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer">' . esc_html($url) . '</a>';
                     } else {
                         // Just the URL text when hard_breaks is false
                         $output .= esc_html($url);
@@ -326,11 +339,24 @@ function tm_render_landingpage_field($show_id, $field_name, $hard_breaks = true,
                 $castcols = intval($atts['castcols']);
                 if ($castcols < 1) $castcols = 3;  // Default to 3 columns
                 if ($castcols > 6) $castcols = 6;  // Max 6 columns
+
+                $cast_image_size = isset($atts['cast_image_size']) ? sanitize_key($atts['cast_image_size']) : 'large';
+                $cast_image_sizes = array(
+                    'small' => '50%',
+                    'medium' => '75%',
+                    'large' => '100%'
+                );
+
+                if (!isset($cast_image_sizes[$cast_image_size])) {
+                    $cast_image_size = 'medium';
+                }
+
+                $cast_img_width = $cast_image_sizes[$cast_image_size];
                 
                 // Pass castcols as CSS custom property: respects castcols at desktop, 
                 // constrains to 2 columns on tablet (max-width: 1024px), 
                 // and 1 column on mobile (max-width: 480px)
-                $output .= '<div class="tm-landingpage-castwithbio" style="--cast-cols: ' . intval($castcols) . '">';
+                $output .= '<div class="tm-landingpage-castwithbio" style="--cast-cols: ' . intval($castcols) . '; --cast-image-width: ' . esc_attr($cast_img_width) . ';">';
                 
                 foreach ($cast_members as $cast_member) {
                     $character = get_post_meta($cast_member->ID, '_tm_cast_character_name', true);
@@ -457,8 +483,12 @@ function tm_shortcode_landingpage($atts) {
         'field_list' => 'show_name,show_image,author,director,producer,stage_manager,synopsis,show_dates,ticket_url,cast,venue',
         'hard_breaks' => 'true',
         'castcols' => '3',
+        'cast_image_size' => 'large',
         'urlbutton' => 'false',
         'buttonformat' => 'default',
+        'text_align' => 'inherit',
+        'font_family' => 'inherit',
+        'text_size' => 'inherit',
         'text_color' => '#333333',
         'bg_color' => '#ffffff',
         'accent_color' => '#0073aa',
@@ -501,15 +531,52 @@ function tm_shortcode_landingpage($atts) {
     $accent_color = sanitize_hex_color($atts['accent_color']) ?: '#0073aa';
     $heading_color = sanitize_hex_color($atts['heading_color']) ?: '#1a1a1a';
 
+    $text_align = sanitize_key($atts['text_align']);
+    $allowed_alignments = array('inherit', 'left', 'center', 'right', 'justify');
+    if (!in_array($text_align, $allowed_alignments, true)) {
+        $text_align = 'inherit';
+    }
+
+    $font_family_key = sanitize_key($atts['font_family']);
+    $font_families = array(
+        'inherit' => 'inherit',
+        'system' => '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        'sans' => 'Arial, Helvetica, sans-serif',
+        'serif' => 'Georgia, "Times New Roman", serif',
+        'georgia' => 'Georgia, serif',
+        'times' => '"Times New Roman", Times, serif',
+        'trebuchet' => '"Trebuchet MS", Helvetica, sans-serif'
+    );
+    if (!isset($font_families[$font_family_key])) {
+        $font_family_key = 'inherit';
+    }
+    $font_family_css = $font_families[$font_family_key];
+
+    $text_size_key = sanitize_key($atts['text_size']);
+    $text_sizes = array(
+        'inherit' => 'inherit',
+        'small' => '0.9rem',
+        'medium' => '1rem',
+        'large' => '1.15rem',
+        'xlarge' => '1.3rem'
+    );
+    if (!isset($text_sizes[$text_size_key])) {
+        $text_size_key = 'inherit';
+    }
+    $text_size_css = $text_sizes[$text_size_key];
+
     // Render the landing page
     if ($hard_breaks) {
         // With hard breaks: wrap in divs for styling control
         $style = sprintf(
-            'style="color: %s; background-color: %s; --tm-accent-color: %s; --tm-heading-color: %s;"',
+            'style="color: %s; background-color: %s; --tm-accent-color: %s; --tm-heading-color: %s; text-align: %s; font-family: %s; font-size: %s;"',
             esc_attr($text_color),
             esc_attr($bg_color),
             esc_attr($accent_color),
-            esc_attr($heading_color)
+            esc_attr($heading_color),
+            esc_attr($text_align),
+            esc_attr($font_family_css),
+            esc_attr($text_size_css)
         );
         $output = '<div class="tm-landingpage-wrapper tm-landingpage" ' . $style . '>';
 
@@ -556,7 +623,7 @@ function tm_shortcode_landingpage($atts) {
                 $output = '<span class="tm-landingpage-image-inline">' . $image_output . '</span>';
             } else {
                 // Mixed content: image + text - wrap everything in centered div
-                $output = '<div class="tm-landingpage-mixed" style="text-align: center;">' . $image_output . $output . '</div>';
+                $output = '<div class="tm-landingpage-mixed" style="text-align: ' . esc_attr($text_align) . '; font-family: ' . esc_attr($font_family_css) . '; font-size: ' . esc_attr($text_size_css) . ';">' . $image_output . $output . '</div>';
             }
         }
     }

@@ -620,15 +620,13 @@
 
 .tm-cast-image {
     display: block;
-    width: 100%;
-    /* Scale image height inversely with number of columns */
-    /* 1 col = 300px, 2 col = 270px, 3 col = 240px, 4+ col = 210px minimum */
-    height: max(210px, calc(300px - (var(--cast-cols, 3) * 15px)));
+    width: var(--cast-image-width, 100%);
+    max-width: 100%;
+    height: auto;
     object-fit: contain;
     background-color: #f0f0f0;
     border-radius: 6px;
-    margin-bottom: 12px;
-    aspect-ratio: 3/4;
+    margin: 0 auto 12px;
 
 
 .tm-cast-character {
@@ -665,8 +663,6 @@
     }
     
     .tm-cast-image {
-        /* Scale for tablet - adjust based on constrained columns */
-        height: max(200px, calc(270px - (var(--cast-cols, 3) * 15px)));
         object-fit: contain;
         margin-bottom: 10px;
     }
@@ -687,8 +683,6 @@
     }
     
     .tm-cast-image {
-        /* Smaller images for medium tablets */
-        height: max(180px, calc(240px - (var(--cast-cols, 3) * 15px)));
         object-fit: contain;
         margin-bottom: 10px;
     }
@@ -716,8 +710,6 @@
     }
     
     .tm-cast-image {
-        /* Mobile images: even more constrained, but responsive */
-        height: max(160px, calc(220px - (var(--cast-cols, 3) * 15px)));
         object-fit: contain;
         margin-bottom: 8px;
     }
