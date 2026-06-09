@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 3.8.0
+Complete Theatre Manager Blocks group with 20 Gutenberg blocks.
+- New unified block system for all shortcodes under "Theatre Manager Blocks" category
+- 20 blocks: Landing Page, Shows, Cast, Board, Sponsors, Advertisers, Seasons, Venues, Testimonials, Awards, Contributors, Auditions, Sponsor Slider, Season Banner, Season Shows, Season Cast, Season Gallery, Cast Show Roles, Programs, Tickets
+- Visual parameter configuration with live shortcode preview
+- Custom block category with theatre icon
+- Smart select dropdowns auto-populated from REST API
+- Range sliders for numeric parameters (columns, limits)
+- Toggle switches for boolean settings
+- Text inputs for field exclusions and custom configs
+- Responsive design across all device sizes
+- Backward compatible with v3.7.19 block
+- Comprehensive documentation for all 20 blocks
+
 ## Version 3.7.19
 Show Landing Page Gutenberg Block added.
 - New Gutenberg block for tm_landingpage shortcode in block editor

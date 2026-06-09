@@ -1,24 +1,55 @@
 # Theatre Manager - Changelog
 
-## [3.7.19] - 2026-06-09
+## [3.8.0] - 2026-06-09
 
 ### Added
-- **Show Landing Page Gutenberg Block**: New block for WordPress block editor providing intuitive interface for `tm_landingpage` shortcode
-  - **Show Selection**: Search for shows by name or select current show
-  - **Field Management**: Check/uncheck fields with drag-to-reorder capability to customize display order
-  - **Live Configuration**: Real-time preview of generated shortcode and configuration summary
-  - **All 14 Fields Supported**: Access all available fields (Show Name, Image, Author, Director, Producer, Stage Manager, Synopsis, Dates, Ticket URL, Cast, Cast with Photos, Venue)
-  - **Cast Grid Options**: Configure 1-6 responsive columns for cast grid layout
-  - **Ticket Button Styling**: Choose from 9 button style formats (Default, Modern, Minimal, Outline, Gradient, Prominent, Success, Ghost, Glass)
-  - **REST API Integration**: Automatic REST API support for show search functionality
-  - **Comprehensive Documentation**: Included README with features, usage guide, and troubleshooting
+- **Theatre Manager Blocks Group**: Complete block editor integration for all Theatre Manager shortcodes
+  - **Unified Custom Category**: All 20 blocks grouped under "Theatre Manager Blocks" category with theatre icon
+  - **Visual Block Editor**: Intuitive sidebar interface for configuring all shortcode parameters
+  - **Live Shortcode Preview**: Real-time display of generated shortcodes as you configure each block
+  - **20 Comprehensive Blocks**:
+    - **Show & Performance** (4): Landing Page, Shows List, Season Banner, Season Shows
+    - **Cast & Crew** (5): Cast List, Season Cast, Cast Show Roles, Board Members, Contributors
+    - **Sponsors & Supporters** (2): Sponsors, Sponsor Slider
+    - **Advertising & Awards** (2): Advertisers, Awards
+    - **Venue & Location** (1): Venues
+    - **Audience Experience** (2): Testimonials, Tickets
+    - **Season & Gallery** (2): Seasons, Season Gallery
+    - **Special Content** (2): Auditions, Programs
 
-### Technical Details
-- Block Name: `theatre-manager/landingpage`
-- Location: `blocks/tm-landingpage-block/`
-- Files: `index.js` (React component), `editor.scss` (styles), `block.json` (metadata)
-- PHP Handler: `includes/blocks.php` - Registers block and enables REST API
-- Default Configuration: All fields enabled in recommended order
+### Technical Features
+- **Unified Block Infrastructure**: Single vanilla JavaScript system supporting all 20 shortcode variations
+- **Custom Category Registration**: Theatre Manager Blocks category with theatre icon and description
+- **Smart Parameter Controls**:
+  - Select dropdowns for shows, seasons, cast members (auto-populated from REST API)
+  - Toggle switches for boolean parameters
+  - Range sliders for numeric values (columns, limits)
+  - Text inputs for custom field configurations
+- **REST API Integration**: Automatic data fetching for all select dropdowns
+- **Responsive & Mobile-Friendly**: All blocks display correctly across all device sizes
+- **Backward Compatibility**: v3.7.19 landing page block continues to work alongside new unified system
+- **Performance Optimized**: Efficient parameter rendering and shortcode generation
+
+### Block Categories Explained
+- **Show & Performance**: Display theatre productions and seasonal information
+- **Cast & Crew**: Manage cast rosters, crew lists, and personnel
+- **Sponsors & Supporters**: Showcase financial and in-kind sponsors
+- **Awards**: Display recognition and achievements
+- **Venue**: Theatre location and facility information
+- **Audience**: Testimonials and ticket information
+- **Gallery**: Season-specific photo galleries
+- **Special**: Auditions, programs, and other content
+
+## [3.7.19] - 2026-06-09
+
+### Fixed
+- Converted Gutenberg block to vanilla JavaScript (no build process required)
+- Updated block.json to work without webpack transpilation
+- Added REST API support to Show CPT for block search functionality
+- Simplified PHP registration for direct asset enqueuing
+
+### Added
+- Show Landing Page Gutenberg block with live preview and field management
 
 ## [3.7.18] - 2026-06-08
 
