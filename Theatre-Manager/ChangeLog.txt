@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 3.8.1
+Enhanced Landing Page Block with interactive show selection and color customization.
+- Interactive show search in block preview with real-time results
+- "Change Show" button for quick show modification
+- Color customization panel with 4 color pickers
+  - Heading Color: Controls show name and section headings
+  - Text Color: Controls all body text and descriptions
+  - Accent Color: Controls links, highlights, and interactive elements
+  - Background Color: Controls page background
+- Predefined color palettes for each picker ensuring accessibility
+- Visual color preview with swatches in configuration summary
+- Enhanced block preview interface with prominent show selection
+- Improved editor styling with better contrast and focus states
+- Default color scheme ensures WCAG AAA compliance
+- Extended shortcode parameters: text_color, bg_color, accent_color, heading_color
+- Show name rendered as h2 heading with proper color styling
+
 ## Version 3.8.0
 Complete Theatre Manager Blocks group with 20 Gutenberg blocks.
 - New unified block system for all shortcodes under "Theatre Manager Blocks" category

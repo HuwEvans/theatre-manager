@@ -1,5 +1,33 @@
 # Theatre Manager - Changelog
 
+## [3.8.1] - 2026-06-09
+
+### Added
+- **Interactive Show Selection & Color Customization** (Landing Page Block):
+  - **Enhanced Show Selection**: Prominent interactive show search directly in block preview with real-time results
+  - **"Change Show" Button**: Quick way to modify show selection without reopening sidebar
+  - **Color Customization Panel**: Four color pickers in inspector:
+    - **Heading Color**: Controls show name and section headings (default: #1a1a1a / Black)
+    - **Text Color**: Controls all body text and descriptions (default: #333333 / Dark Gray)
+    - **Accent Color**: Controls links, highlights, and interactive elements (default: #0073aa / Blue)
+    - **Background Color**: Controls page background (default: #ffffff / White)
+  - **Predefined Color Palettes**: Hand-selected colors for each picker ensuring excellent readability and accessibility
+  - **Visual Color Preview**: Color swatches displayed in configuration summary showing selected scheme
+  - **Live Color Preview**: Block preview updates in real-time as colors are adjusted
+
+### Improved
+- **Block Preview Interface**: Reorganized to show show selection prominently at top with search results
+- **Interactive Search Results**: Improved hover states and click handling in results dropdown
+- **Editor Styling**: Enhanced contrast, focus states, and visual hierarchy throughout inspector
+- **Color Contrast**: Default color scheme ensures WCAG AAA compliance for all text/background combinations
+
+### Technical
+- Added ColorPalette component to block editor
+- Extended shortcode parameters: text_color, bg_color, accent_color, heading_color
+- Implemented CSS color variables for flexible styling
+- Applied inline styles to shortcode output for color application
+- Enhanced show_name field with h2 heading tag and proper color styling
+
 ## [3.8.0] - 2026-06-09
 
 ### Added
