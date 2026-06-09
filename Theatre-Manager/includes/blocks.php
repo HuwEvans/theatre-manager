@@ -46,6 +46,15 @@ function tm_enqueue_block_assets() {
         true
     );
 
+    // Also enqueue standalone landing page block for backwards compatibility
+    wp_enqueue_script(
+        'tm-landingpage-block-editor',
+        TM_PLUGIN_URL . 'blocks/tm-landingpage-block/index.js',
+        ['wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor'],
+        THEATRE_MANAGER_VERSION,
+        true
+    );
+
     // Enqueue editor styles
     wp_enqueue_style(
         'tm-blocks-editor',
@@ -54,7 +63,7 @@ function tm_enqueue_block_assets() {
         THEATRE_MANAGER_VERSION
     );
 
-    // Legacy landing page block styles for backwards compatibility
+    // Landing page block styles
     wp_enqueue_style(
         'tm-landingpage-block-editor',
         TM_PLUGIN_URL . 'blocks/tm-landingpage-block/editor.css',

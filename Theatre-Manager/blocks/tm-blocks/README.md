@@ -2,24 +2,22 @@
 
 ## Overview
 
-Theatre Manager now provides a complete suite of 20 Gutenberg blocks grouped under "Theatre Manager Blocks" category. All blocks provide visual configuration in the WordPress block editor with live shortcode preview.
+Theatre Manager provides a complete suite of 20 Gutenberg blocks:
+- **Show Landing Page**: Standalone block with advanced features (drag-to-reorder fields, live preview)
+- **19 Other Blocks**: Unified group under "Theatre Manager Blocks" category with visual configuration
 
-## Block Categories
+All blocks provide visual configuration in the WordPress block editor with live shortcode preview.
 
-### Show & Performance Information (4 blocks)
+## Block Organization
 
-#### 1. **Show Landing Page**
-- **Purpose**: Display comprehensive show information
-- **Parameters**:
-  - Show: Current or select specific show
-  - Fields: Select which fields to display
-  - Cast Columns: 1-6 columns for cast grid
-  - Ticket Button: Enable/disable button
-  - Button Style: 9 style options
-- **Best For**: Show detail pages, homepage featured show
-- **Default Output**: Show name, image, credits, synopsis, cast, dates, tickets, venue
+### Standalone Block
+- **Show Landing Page** - Advanced features, separate UI from unified system
 
-#### 2. **Shows List**
+### Unified Theatre Manager Blocks Group (19 blocks)
+
+### Show & Performance (3 blocks)
+
+#### 1. **Shows List**
 - **Purpose**: Display all shows grouped by season
 - **Parameters**:
   - Exclude Fields: Hide specific fields

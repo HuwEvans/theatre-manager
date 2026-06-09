@@ -16,24 +16,10 @@
 
     /**
      * Block Configuration for all Theatre Manager shortcodes
-     * Format: { name, title, description, parameters: [...], defaultAttrs: {...} }
+     * Note: Landing Page block is registered separately as standalone block for better UX
+     * This system handles the other 19 blocks
      */
     const BLOCKS_CONFIG = [
-        {
-            name: 'theatre-manager/landingpage',
-            title: 'Show Landing Page',
-            description: 'Display comprehensive show information with cast, dates, and venue',
-            icon: 'theater',
-            category: 'theatre-manager',
-            fields: [
-                { id: 'show_id', label: 'Show', type: 'select', options: [] },
-                { id: 'field_list', label: 'Fields', type: 'multiselect', options: ['show_name', 'show_image', 'author', 'director', 'producer', 'stage_manager', 'synopsis', 'show_dates', 'ticket_url', 'cast', 'castwithbio', 'venue'] },
-                { id: 'castcols', label: 'Cast Columns', type: 'number', min: 1, max: 6, default: 3 },
-                { id: 'urlbutton', label: 'Show Ticket Button', type: 'boolean', default: true },
-                { id: 'buttonformat', label: 'Button Style', type: 'select', options: ['default', 'modern', 'minimal', 'outline', 'gradient', 'prominent', 'success', 'ghost', 'glass'] }
-            ],
-            defaults: { show_id: 'current', castcols: 3, urlbutton: true, buttonformat: 'default' }
-        },
         {
             name: 'theatre-manager/tm-shows',
             title: 'Shows List',
@@ -290,7 +276,6 @@
 
             const generateShortcode = () => {
                 const shortcodeMap = {
-                    'theatre-manager/landingpage': 'tm_landingpage',
                     'theatre-manager/tm-shows': 'tm_shows',
                     'theatre-manager/tm-cast': 'tm_cast',
                     'theatre-manager/tm-board-members': 'tm_board_members',
@@ -425,7 +410,6 @@
                 if (!config) return null;
 
                 const shortcodeMap = {
-                    'theatre-manager/landingpage': 'tm_landingpage',
                     'theatre-manager/tm-shows': 'tm_shows',
                     'theatre-manager/tm-cast': 'tm_cast',
                     'theatre-manager/tm-board-members': 'tm_board_members',
