@@ -62,6 +62,7 @@ function tm_register_show_cpt() {
         'show_in_menu' => get_option('tm_show_builder_cpt_menus', '1') ? 'theatre-manager' : false,
         'capability_type' => 'post',
         'map_meta_cap' => true,
+        'show_in_rest' => true,
     );
 
     register_post_type('show', $args);
